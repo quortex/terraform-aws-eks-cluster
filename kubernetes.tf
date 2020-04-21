@@ -32,6 +32,8 @@ resource "aws_security_group" "quortex" {
     Name = var.name
   }
 }
+# TODO: should the security group be defined in the cluster module or in the network module ?
+
 
 resource "aws_security_group_rule" "quortex-ingress-workstation-https" {
   description       = "Allow workstation to communicate with the cluster API Server"
@@ -44,6 +46,7 @@ resource "aws_security_group_rule" "quortex-ingress-workstation-https" {
   cidr_blocks = [for name, cidr in var.master_authorized_networks: cidr]
   # TODO: should we specify 1 rule per cidr block, 
   # or a single rule with multiple cidr blocks, like this ?
+  # In the 1st case, we can more easily add/remove, and label by owner
 }
 
 # Cluster
@@ -65,20 +68,24 @@ resource "aws_eks_cluster" "quortex" {
   ]
 }
 
-
 # Worker nodes
 
 resource "aws_eks_node_group" "quortex" {
+  for_each = var.node_groups
+
   cluster_name    = aws_eks_cluster.quortex.name
-  node_group_name = "${var.name}_workers"
+  node_group_name = each.key
   node_role_arn   = aws_iam_role.quortex_role_worker.arn
-  subnet_ids         = var.subnet_ids
+  subnet_ids      = var.subnet_ids
 
   scaling_config {
-    desired_size = 1
-    max_size     = 1
-    min_size     = 1
+    desired_size = lookup(each.value, "scaling_desired_size", 1)
+    min_size = lookup(each.value, "scaling_min_size", 1)
+    max_size = lookup(each.value, "scaling_max_size", 1)
   }
+
+  instance_types = lookup(each.value, "instance_types", ["t3.medium"])
+  disk_size = lookup(each.value, "disk_size", 20)
 
   tags = var.resource_labels
 

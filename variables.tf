@@ -47,4 +47,7 @@ variable "resource_labels" {
   default     = {}
 }
 
-# TODO: add variables to customize the node group
+variable "node_groups" {
+  type        = map(any)
+  description = "The cluster nodes instances configuration. Defined as a map where the key defines the node name, and the value is a map defining instance_types, scaling_desired_size, scaling_min_size, scaling_max_size, disk_size"
+}

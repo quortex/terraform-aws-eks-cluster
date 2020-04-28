@@ -30,9 +30,14 @@ variable "vpc_id" {
   description = "ID of the VPC this cluster should be attached to."
 }
 
-variable "subnet_ids" {
+variable "subnet_ids_master" {
   type        = list(string)
-  description = "The IDs of the subnets"
+  description = "The IDs of the subnets for the master nodes"
+}
+
+variable "subnet_ids_worker" {
+  type        = list(string)
+  description = "The IDs of the subnets for the worker nodes"
 }
 
 variable "master_authorized_networks" {

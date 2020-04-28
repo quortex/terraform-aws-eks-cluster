@@ -13,3 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+output "autoscaling_group_names" {
+  value       = flatten([for node_group in aws_eks_node_group.quortex : [for r in node_group.resources: [for g in r.autoscaling_groups: g.name]]])
+  description = "The names of the created autoscaling groups"
+}
+
+output "cluster_security_group_id" {
+  value       = aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id
+  description = "The cluster security group that was created by Amazon EKS for the cluster."
+}

@@ -28,9 +28,11 @@ resource "aws_security_group" "quortex" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = var.name
-  }
+  tags = merge({
+      Name = var.name
+    },
+    var.resource_labels
+  )
 }
 # TODO: should the security group be defined in the cluster module or in the network module ?
 
@@ -60,7 +62,7 @@ resource "aws_eks_cluster" "quortex" {
     subnet_ids         = var.subnet_ids
   }
 
-  tags = var.resource_labels # TODO: are these labels intended for AWS resource tagging, or Kubernetes node labelling ?
+  tags = var.resource_labels
 
   depends_on = [
     aws_iam_role_policy_attachment.quortex-AmazonEKSClusterPolicy,

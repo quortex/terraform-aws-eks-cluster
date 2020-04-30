@@ -25,6 +25,12 @@ variable "region" {
   description = "The AWS region in wich to create network regional resources (subnet, router, nat...)."
 }
 
+variable "kubernetes_version" {
+  type        = string
+  description = "Kubernetes master version."
+  default     = "1.15"
+}
+
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC this cluster should be attached to."

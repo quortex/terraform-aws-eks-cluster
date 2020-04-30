@@ -29,7 +29,7 @@ resource "aws_security_group" "quortex" {
   }
 
   tags = merge({
-      Name = var.name
+    Name = var.name
     },
     var.resource_labels
   )
@@ -45,7 +45,7 @@ resource "aws_security_group_rule" "quortex-ingress-workstation-https" {
   to_port           = 443
   type              = "ingress"
 
-  cidr_blocks = [for name, cidr in var.master_authorized_networks: cidr]
+  cidr_blocks = [for name, cidr in var.master_authorized_networks : cidr]
   # TODO: should we specify 1 rule per cidr block, 
   # or a single rule with multiple cidr blocks, like this ?
   # In the 1st case, we can more easily add/remove, and label by owner
@@ -82,12 +82,12 @@ resource "aws_eks_node_group" "quortex" {
 
   scaling_config {
     desired_size = lookup(each.value, "scaling_desired_size", 1)
-    min_size = lookup(each.value, "scaling_min_size", 1)
-    max_size = lookup(each.value, "scaling_max_size", 1)
+    min_size     = lookup(each.value, "scaling_min_size", 1)
+    max_size     = lookup(each.value, "scaling_max_size", 1)
   }
 
   instance_types = lookup(each.value, "instance_types", ["t3.medium"])
-  disk_size = lookup(each.value, "disk_size", 20)
+  disk_size      = lookup(each.value, "disk_size", 20)
 
   tags = var.resource_labels
 

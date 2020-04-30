@@ -15,7 +15,7 @@
  */
 
 output "autoscaling_group_names" {
-  value       = flatten([for node_group in aws_eks_node_group.quortex : [for r in node_group.resources: [for g in r.autoscaling_groups: g.name]]])
+  value       = flatten([for node_group in aws_eks_node_group.quortex : [for r in node_group.resources : [for g in r.autoscaling_groups : g.name]]])
   description = "The names of the created autoscaling groups"
 }
 

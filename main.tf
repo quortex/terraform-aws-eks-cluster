@@ -17,5 +17,5 @@
 # AWS provider configuration
 # version constraints defined in versions.tf
 provider "aws" {
-  region  = var.region
+  region = var.region
 }

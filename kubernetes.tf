@@ -37,18 +37,17 @@ resource "aws_security_group" "quortex" {
 # TODO: should the security group be defined in the cluster module or in the network module ?
 
 
-resource "aws_security_group_rule" "quortex_ingress_workstation_https" {
-  description       = "Allow workstation to communicate with the cluster API Server"
+resource "aws_security_group_rule" "quortex_ingress_authorized" {
+  for_each = var.master_authorized_networks
+
+  description       = each.key
   from_port         = 443
   protocol          = "tcp"
   security_group_id = aws_security_group.quortex.id
   to_port           = 443
   type              = "ingress"
 
-  cidr_blocks = [for name, cidr in var.master_authorized_networks : cidr]
-  # TODO: should we specify 1 rule per cidr block, 
-  # or a single rule with multiple cidr blocks, like this ?
-  # In the 1st case, we can more easily add/remove, and label by owner
+  cidr_blocks = [each.value]
 }
 
 # Cluster

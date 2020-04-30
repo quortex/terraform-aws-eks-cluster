@@ -37,7 +37,7 @@ resource "aws_security_group" "quortex" {
 # TODO: should the security group be defined in the cluster module or in the network module ?
 
 
-resource "aws_security_group_rule" "quortex-ingress-workstation-https" {
+resource "aws_security_group_rule" "quortex_ingress_workstation_https" {
   description       = "Allow workstation to communicate with the cluster API Server"
   from_port         = 443
   protocol          = "tcp"

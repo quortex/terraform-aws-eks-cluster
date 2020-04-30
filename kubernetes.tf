@@ -31,7 +31,7 @@ resource "aws_security_group" "quortex" {
   tags = merge({
     Name = var.name
     },
-    var.resource_labels
+    var.tags
   )
 }
 # TODO: should the security group be defined in the cluster module or in the network module ?
@@ -62,7 +62,7 @@ resource "aws_eks_cluster" "quortex" {
     subnet_ids         = var.subnet_ids_master
   }
 
-  tags = var.resource_labels
+  tags = var.tags
 
   depends_on = [
     aws_iam_role_policy_attachment.quortex-AmazonEKSClusterPolicy,
@@ -89,7 +89,7 @@ resource "aws_eks_node_group" "quortex" {
   instance_types = lookup(each.value, "instance_types", ["t3.medium"])
   disk_size      = lookup(each.value, "disk_size", 20)
 
-  tags = var.resource_labels
+  tags = var.tags
 
   depends_on = [
     aws_iam_role_policy_attachment.quortex-AmazonEKSWorkerNodePolicy,

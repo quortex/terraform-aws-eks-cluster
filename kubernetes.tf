@@ -86,6 +86,13 @@ resource "aws_eks_node_group" "quortex" {
     max_size     = lookup(each.value, "scaling_max_size", 1)
   }
 
+  lifecycle {
+    ignore_changes = [
+      # ignore changes to the cluster size, because it can be changed by autoscaling
+      scaling_config["desired_size"],
+    ]
+  }
+
   instance_types = lookup(each.value, "instance_types", ["t3.medium"])
   disk_size      = lookup(each.value, "disk_size", 20)
 

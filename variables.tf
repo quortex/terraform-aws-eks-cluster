@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-variable "name" {
-  type        = string
-  description = "This value will be in the Name tag of all network resources."
-  # TODO: add a default
+variable "cluster_name" {
+  type = string
+  description = "A name to be used as the AWS resource name for the cluster"
+  default = "quortex"
+}
+
+variable "master_role_name" {
+  type = string
+  description = "A name to be used as the AWS resource name for the master role"
+  default = "quortex-master"
+}
+
+variable "worker_role_name" {
+  type = string
+  description = "A name to be used as the AWS resource name for the worker role"
+  default = "quortex-worker"
 }
 
 variable "region" {

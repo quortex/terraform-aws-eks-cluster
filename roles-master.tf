@@ -18,7 +18,7 @@
 # IAM Role to allow EKS service to manage other AWS services
 
 resource "aws_iam_role" "quortex_role_master" {
-  name        = "${var.name}_role_master"
+  name        = var.master_role_name
   description = "IAM Role to allow EKS service to manage other AWS services"
 
   assume_role_policy = <<POLICY
@@ -36,9 +36,9 @@ resource "aws_iam_role" "quortex_role_master" {
 }
 POLICY
 
-  tags = map(
-    "Name", "${var.name}",
-  )
+  # tags = map(
+  #   "Name", "${var.master_role_name}",
+  # )
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSClusterPolicy" {

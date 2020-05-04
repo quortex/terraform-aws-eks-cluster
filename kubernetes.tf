@@ -18,7 +18,7 @@
 # Cluster
 
 resource "aws_eks_cluster" "quortex" {
-  name     = var.name
+  name     = var.cluster_name
   role_arn = aws_iam_role.quortex_role_master.arn
   version  = var.kubernetes_version
 

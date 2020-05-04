@@ -17,7 +17,7 @@
 # IAM Role to allow the worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster.
 
 resource "aws_iam_role" "quortex_role_worker" {
-  name        = "${var.name}_role_worker"
+  name        = var.worker_role_name
   description = "IAM Role to allow the worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster."
 
   assume_role_policy = <<POLICY
@@ -35,9 +35,9 @@ resource "aws_iam_role" "quortex_role_worker" {
 }
 POLICY
 
-  tags = map(
-    "Name", "${var.name}",
-  )
+  # tags = map(
+  #   "Name", "${var.worker_role_name}",
+  # )
 }
 
 

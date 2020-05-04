@@ -14,41 +14,6 @@
  * limitations under the License.
 */
 
-# Security group
-
-resource "aws_security_group" "quortex" {
-  name        = var.name
-  description = "Cluster communication with worker nodes"
-  vpc_id      = var.vpc_id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = merge({
-    Name = var.name
-    },
-    var.tags
-  )
-}
-# TODO: should the security group be defined in the cluster module or in the network module ?
-
-
-resource "aws_security_group_rule" "quortex_ingress_authorized" {
-  for_each = var.master_authorized_networks
-
-  description       = each.key
-  from_port         = 443
-  protocol          = "tcp"
-  security_group_id = aws_security_group.quortex.id
-  to_port           = 443
-  type              = "ingress"
-
-  cidr_blocks = [each.value]
-}
 
 # Cluster
 
@@ -58,7 +23,7 @@ resource "aws_eks_cluster" "quortex" {
   version  = var.kubernetes_version
 
   vpc_config {
-    security_group_ids = [aws_security_group.quortex.id]
+    public_access_cidrs = [for k,v in var.master_authorized_networks: v]
     subnet_ids         = var.subnet_ids_master
   }
 

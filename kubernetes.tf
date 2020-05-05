@@ -23,8 +23,15 @@ resource "aws_eks_cluster" "quortex" {
   version  = var.kubernetes_version
 
   vpc_config {
-    public_access_cidrs = [for k,v in var.master_authorized_networks: v]
     subnet_ids         = var.subnet_ids_master
+
+    # Public endpoint: enabled but restricted to an IP range list
+    endpoint_public_access = true
+    public_access_cidrs = [for label,cidr_block in var.master_authorized_networks: cidr_block]
+
+    # Private endpoint: enabled for communication between worker nodes and the API server (since public endpoint is restricted)
+    endpoint_private_access = true
+    # Note: for private endpoint to work, DNS hostnames must be enabled in the VPC
   }
 
   tags = var.tags

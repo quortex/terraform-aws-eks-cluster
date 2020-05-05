@@ -15,21 +15,21 @@
  */
 
 variable "cluster_name" {
-  type = string
+  type        = string
   description = "A name to be used as the AWS resource name for the cluster"
-  default = "quortex"
+  default     = "quortex"
 }
 
 variable "master_role_name" {
-  type = string
+  type        = string
   description = "A name to be used as the AWS resource name for the master role"
-  default = "quortex-master"
+  default     = "quortex-master"
 }
 
 variable "worker_role_name" {
-  type = string
+  type        = string
   description = "A name to be used as the AWS resource name for the worker role"
-  default = "quortex-worker"
+  default     = "quortex-worker"
 }
 
 variable "region" {
@@ -73,4 +73,16 @@ variable "tags" {
 variable "node_groups" {
   type        = map(any)
   description = "The cluster nodes instances configuration. Defined as a map where the key defines the node name, and the value is a map defining instance_types, scaling_desired_size, scaling_min_size, scaling_max_size, disk_size"
+}
+
+variable "remote_access_ssh_key" {
+  type        = string
+  description = "Configure SSH access to the nodes. Specify a key pair name that exists in AWS EC2."
+  default     = null
+}
+
+variable "remote_access_allowed_ip_ranges" {
+  type        = list(string)
+  description = "List of IP CIDR blocks allowed to access the nodes via SSH"
+  default     = []
 }

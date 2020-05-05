@@ -23,11 +23,11 @@ resource "aws_eks_cluster" "quortex" {
   version  = var.kubernetes_version
 
   vpc_config {
-    subnet_ids         = var.subnet_ids_master
+    subnet_ids = var.subnet_ids_master
 
     # Public endpoint: enabled but restricted to an IP range list
     endpoint_public_access = true
-    public_access_cidrs = [for label,cidr_block in var.master_authorized_networks: cidr_block]
+    public_access_cidrs    = [for label, cidr_block in var.master_authorized_networks : cidr_block]
 
     # Private endpoint: enabled for communication between worker nodes and the API server (since public endpoint is restricted)
     endpoint_private_access = true
@@ -68,6 +68,11 @@ resource "aws_eks_node_group" "quortex" {
   instance_types = lookup(each.value, "instance_types", ["t3.medium"])
   disk_size      = lookup(each.value, "disk_size", 20)
 
+  remote_access {
+    ec2_ssh_key               = var.remote_access_ssh_key
+    source_security_group_ids = aws_security_group.remote_access[*].id
+  }
+
   tags = var.tags
 
   depends_on = [
@@ -75,5 +80,26 @@ resource "aws_eks_node_group" "quortex" {
     aws_iam_role_policy_attachment.quortex-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.quortex-AmazonEC2ContainerRegistryReadOnly,
   ]
+}
+
+resource "aws_security_group" "remote_access" {
+  # Create this security group only if remote access is requested
+  count = var.remote_access_ssh_key != null ? 1 : 0
+
+  name        = "${var.cluster_name}-ssh"
+  description = "Allow remote access (SSH)"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "SSH access from specified IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.remote_access_allowed_ip_ranges
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-ssh"
+  }
 }
 

@@ -68,9 +68,13 @@ resource "aws_eks_node_group" "quortex" {
   instance_types = lookup(each.value, "instance_types", ["t3.medium"])
   disk_size      = lookup(each.value, "disk_size", 20)
 
-  remote_access {
-    ec2_ssh_key               = var.remote_access_ssh_key
-    source_security_group_ids = aws_security_group.remote_access[*].id
+  dynamic "remote_access" {
+    for_each = var.remote_access_ssh_key != null ? [true] : []
+
+    content {
+      ec2_ssh_key               = var.remote_access_ssh_key
+      source_security_group_ids = aws_security_group.remote_access[*].id
+    }
   }
 
   tags = var.tags

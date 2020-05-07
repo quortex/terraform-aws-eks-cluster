@@ -43,6 +43,11 @@ variable "kubernetes_version" {
   default     = "1.15"
 }
 
+variable "availability_zones" {
+  type        = list(string)
+  description = "The list of availability zones (AZ)"
+}
+
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC this cluster should be attached to."
@@ -72,7 +77,18 @@ variable "tags" {
 
 variable "node_groups" {
   type        = map(any)
-  description = "The cluster nodes instances configuration. Defined as a map where the key defines the node name, and the value is a map defining instance_types, scaling_desired_size, scaling_min_size, scaling_max_size, disk_size"
+  description = "EKS-managed node groups. The nodes are attached automatically to the cluster via EKS. Defined as a map where the key defines the node group name, and the value is a map defining instance_types, scaling_desired_size, scaling_min_size, scaling_max_size, disk_size"
+}
+
+variable "node_groups_advanced" {
+  type        = map(any)
+  description = "[EXPERIMENTAL] Node groups that are not managed via EKS. The nodes are attached to the cluster with userdata passed to the instance boot script. More options are available than with EKS-managed node groups (taints, spot instances...). Defined as a map where the key defines the node group name, and the value is a map containing the node group parameters." # TODO: complete the description
+}
+
+variable "instance_profile_name" {
+  type = string
+  description = "A name for the instance profile resource in AWS. Used only when node_groups_advanced is used."
+  default = "quortex"
 }
 
 variable "remote_access_ssh_key" {

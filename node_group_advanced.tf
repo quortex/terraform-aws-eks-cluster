@@ -76,7 +76,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 
   vpc_security_group_ids = flatten([
     aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id, # the cluster security group (created by EKS)
-    aws_security_group.remote_access[*].id # the SSH security group
+    aws_security_group.remote_access[*].id                           # the SSH security group
   ])
 
   key_name = var.remote_access_ssh_key
@@ -87,12 +87,11 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 resource "aws_autoscaling_group" "quortex_asg_advanced" {
   for_each = var.node_groups_advanced
 
-  name = each.key
-
-  vpc_zone_identifier  = var.subnet_ids_worker
-  desired_capacity   = each.value.scaling_desired_size
-  max_size           = each.value.scaling_max_size
-  min_size           = each.value.scaling_min_size
+  name                = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
+  vpc_zone_identifier = var.subnet_ids_worker
+  desired_capacity    = each.value.scaling_desired_size
+  max_size            = each.value.scaling_max_size
+  min_size            = each.value.scaling_min_size
 
   lifecycle {
     ignore_changes = [

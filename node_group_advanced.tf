@@ -74,23 +74,12 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     name = aws_iam_instance_profile.quortex.name
   }
 
-  dynamic "network_interfaces" {
-    for_each = var.subnet_ids_worker
-    iterator = subnet_id
+  vpc_security_group_ids = flatten([
+    aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id, # the cluster security group (created by EKS)
+    aws_security_group.remote_access[*].id # the SSH security group
+  ])
 
-    content {
-      delete_on_termination = true
-      subnet_id             = subnet_id.value
-      security_groups = flatten([
-        # the cluster security group (created by EKS)
-        aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id,
-        # the SSH security group
-        aws_security_group.remote_access[*].id
-      ])
-    }
-  }
-
-  key_name = var.remote_access_ssh_key # TODO: test when it is not defined (null)
+  key_name = var.remote_access_ssh_key
 
 }
 
@@ -100,7 +89,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
 
   name = each.key
 
-  availability_zones = var.availability_zones
+  vpc_zone_identifier  = var.subnet_ids_worker
   desired_capacity   = each.value.scaling_desired_size
   max_size           = each.value.scaling_max_size
   min_size           = each.value.scaling_min_size

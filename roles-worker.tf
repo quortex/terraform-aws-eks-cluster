@@ -58,3 +58,32 @@ resource "aws_iam_role_policy_attachment" "quortex-AmazonEC2ContainerRegistryRea
   role       = aws_iam_role.quortex_role_worker.name
 }
 
+resource "aws_iam_policy" "quortex-autoscaler-policy" {
+  description = "Allow the cluster autoscaler to make calls to the AWS APIs."
+
+  policy = <<POLICY
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:DescribeAutoScalingInstances",
+                "autoscaling:DescribeLaunchConfigurations",
+                "autoscaling:DescribeTags",
+                "autoscaling:SetDesiredCapacity",
+                "autoscaling:TerminateInstanceInAutoScalingGroup",
+                "ec2:DescribeLaunchTemplateVersions"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy_attachment" "quortex-autoscaler-policy-attach" {
+  role       = aws_iam_role.quortex_role_worker.name
+  policy_arn = aws_iam_policy.quortex-autoscaler-policy.arn
+}

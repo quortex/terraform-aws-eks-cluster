@@ -26,7 +26,7 @@ resource "aws_iam_instance_profile" "quortex" {
 resource "aws_launch_template" "quortex_launch_tpl" {
   for_each = var.node_groups_advanced
 
-  name = "${aws_eks_cluster.quortex.name}-${each.key}"
+  name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
 
   image_id = each.value.image_id
   # If multiple instance types are required, the instance type can be overridden in the autoscaling group
@@ -40,21 +40,32 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     }
   }
 
-  tags = {
-    "eks:cluster-name"   = aws_eks_cluster.quortex.name
-    "eks:nodegroup-name" = each.key
-  }
 
   user_data = base64encode(
     templatefile(
       "${path.module}/userdata.sh.tpl",
       {
         cluster_name            = aws_eks_cluster.quortex.name
-        ami_id                  = each.value.image_id
-        nodegroup_name          = each.key
         base64_cluster_ca       = aws_eks_cluster.quortex.certificate_authority[0].data
         api_server_url          = aws_eks_cluster.quortex.endpoint
-        kubelet_more_extra_args = length(each.value.taints) == 0 ? "" : "--register-with-taints=${join(",", each.value.taints)}"
+        kubelet_more_extra_args = ""
+        node_taints             = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
+        node_labels = join(
+          ",",
+          [
+            for k, v in
+            merge(
+              # Built-in labels
+              map(
+                "eks.amazonaws.com/nodegroup-image", each.value.image_id,
+                "eks.amazonaws.com/nodegroup", each.key,
+                "nodegroup", each.key
+              ),
+              # User-specified labels
+              lookup(each.value, "labels", {}),
+            )
+          : "${k}=${v}"]
+        )
       }
     )
   )
@@ -87,7 +98,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 resource "aws_autoscaling_group" "quortex_asg_advanced" {
   for_each = var.node_groups_advanced
 
-  name                = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
+  name                = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
   vpc_zone_identifier = var.subnet_ids_worker
   desired_capacity    = each.value.scaling_desired_size
   max_size            = each.value.scaling_max_size
@@ -105,16 +116,10 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     version = "$Latest"
   }
 
-  # These "eks:" tags might not be required, they are usually set when EKS is managing the node group, here we are trying to replicate the same
   tag {
     key                 = "eks:cluster-name"
     propagate_at_launch = true
     value               = var.cluster_name
-  }
-  tag {
-    key                 = "eks:nodegroup-name"
-    propagate_at_launch = true
-    value               = each.key
   }
 
   tag {
@@ -133,6 +138,45 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     key                 = "kubernetes.io/cluster/${var.cluster_name}"
     propagate_at_launch = true
     value               = "owned"
+  }
+
+  # built-in labels
+
+  tag {
+    key                 = "nodegroup"
+    value               = each.key
+    propagate_at_launch = true
+  }
+
+  tag { # tag required for scaling to/from 0
+    key                 = "k8s.io/cluster-autoscaler/node-template/label/nodegroup"
+    value               = each.key
+    propagate_at_launch = true
+  }
+
+
+  # user-defined labels
+  dynamic "tag" {
+    for_each = lookup(each.value, "labels", {})
+    iterator = label
+
+    content {
+      key                 = "k8s.io/cluster-autoscaler/node-template/label/${label.key}"
+      value               = label.value
+      propagate_at_launch = true
+    }
+  }
+
+  # taints
+  dynamic "tag" {
+    for_each = lookup(each.value, "taints", {})
+    iterator = taint
+
+    content {
+      key                 = "k8s.io/cluster-autoscaler/node-template/taint/${taint.key}"
+      value               = taint.value
+      propagate_at_launch = true
+    }
   }
 
 }

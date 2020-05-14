@@ -48,7 +48,7 @@ resource "aws_eks_node_group" "quortex" {
   for_each = var.node_groups
 
   cluster_name    = aws_eks_cluster.quortex.name
-  node_group_name = each.key
+  node_group_name = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
   node_role_arn   = aws_iam_role.quortex_role_worker.arn
   subnet_ids      = var.subnet_ids_worker
 
@@ -77,7 +77,22 @@ resource "aws_eks_node_group" "quortex" {
     }
   }
 
-  tags = var.tags
+  tags = merge(
+    map(
+      # tag the node group so that it can be auto-discovered by the cluster autoscaler
+      "k8s.io/cluster-autoscaler/${var.cluster_name}", "owned",
+      "k8s.io/cluster-autoscaler/enabled", "true",
+      "k8s.io/cluster-autoscaler/node-template/label/nodegroup", each.key, # tag required for scaling to/from 0
+    ),
+    var.tags
+  )
+
+  labels = merge(
+    map(
+      "nodegroup", each.key
+    ),
+    lookup(each.value, "labels", {})
+  )
 
   depends_on = [
     aws_iam_role_policy_attachment.quortex-AmazonEKSWorkerNodePolicy,

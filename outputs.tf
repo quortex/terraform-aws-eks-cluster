@@ -30,3 +30,8 @@ output "cluster_security_group_id" {
   value       = aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id
   description = "The cluster security group that was created by Amazon EKS for the cluster."
 }
+
+output "worker_role_arn" {
+  value       = aws_iam_role.quortex_role_worker.arn
+  description = "The ARN identifier of the role created in AWS for allowing the worker nodes to make calls to the AWS APIs"
+}

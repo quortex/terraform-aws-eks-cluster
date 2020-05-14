@@ -32,6 +32,12 @@ variable "worker_role_name" {
   default     = "quortex-worker"
 }
 
+variable "autoscaler_role_name" {
+  type        = string
+  description = "A name to be used as the AWS resource name for the autoscaler role"
+  default     = "quortex-autoscaler"
+}
+
 variable "region" {
   type        = string
   description = "The AWS region in wich to create network regional resources (subnet, router, nat...)."
@@ -86,9 +92,9 @@ variable "node_groups_advanced" {
 }
 
 variable "instance_profile_name" {
-  type = string
+  type        = string
   description = "A name for the instance profile resource in AWS. Used only when node_groups_advanced is used."
-  default = "quortex"
+  default     = "quortex"
 }
 
 variable "remote_access_ssh_key" {

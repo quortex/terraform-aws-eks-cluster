@@ -29,17 +29,6 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
 
   image_id = each.value.image_id
-  # If multiple instance types are required, the instance type can be overridden in the autoscaling group
-  instance_type = each.value.instance_types[0] # TODO: add possibility to specify multiple instance types ("mixed instance")
-
-  dynamic "instance_market_options" {
-    for_each = each.value.market_type == "spot" ? [true] : []
-
-    content {
-      market_type = "spot"
-    }
-  }
-
 
   user_data = base64encode(
     templatefile(
@@ -111,10 +100,32 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     ]
   }
 
-  launch_template {
-    id      = aws_launch_template.quortex_launch_tpl[each.key].id
-    version = "$Latest"
+  mixed_instances_policy {
+
+    instances_distribution {
+      on_demand_base_capacity                  = 0
+      on_demand_percentage_above_base_capacity = 0
+      # TODO: customize spot allocation strategy
+      spot_allocation_strategy                 = "capacity-optimized"
+      spot_max_price                           = ""
+    }
+
+    launch_template {
+      launch_template_specification {
+        launch_template_id = aws_launch_template.quortex_launch_tpl[each.key].id
+        version            = "$Latest"
+      }
+
+      dynamic "override" {
+        for_each = each.value.instance_types
+        content {
+          instance_type = override.value
+        }
+      }
+
+    }
   }
+
 
   tag {
     key                 = "eks:cluster-name"

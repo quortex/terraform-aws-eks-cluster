@@ -21,7 +21,7 @@ output "autoscaling_group_names" {
       [for node_group in aws_eks_node_group.quortex : [for r in node_group.resources : [for g in r.autoscaling_groups : g.name]]]
     ),
     # Retrieve the non-managed autoscaling group names
-    [for name, v in aws_autoscaling_group.quortex_asg_advanced : name]
+    [for name, v in aws_autoscaling_group.quortex_asg_advanced : v.name]
   )
   description = "The names of the created autoscaling groups"
 }

@@ -105,7 +105,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     instances_distribution {
       on_demand_base_capacity                  = 0
       on_demand_percentage_above_base_capacity = 0
-      # TODO: customize spot allocation strategy
+      # TODO: make spot allocation strategy configurable
       spot_allocation_strategy                 = "capacity-optimized"
       spot_max_price                           = ""
     }

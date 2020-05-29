@@ -88,7 +88,7 @@ variable "node_groups" {
 
 variable "node_groups_advanced" {
   type        = map(any)
-  description = "[EXPERIMENTAL] Node groups that are not managed via EKS. The nodes are attached to the cluster with userdata passed to the instance boot script. More options are available than with EKS-managed node groups (taints, spot instances...). Defined as a map where the key defines the node group name, and the value is a map containing the node group parameters." # TODO: complete the description
+  description = "[EXPERIMENTAL] Node groups that are not managed via EKS. The nodes are attached to the cluster with userdata passed to the instance boot script. More options are available than with EKS-managed node groups (taints, spot instances...). Defined as a map where the key defines the node group name, and the value is a map containing the node group parameters."
 }
 
 variable "instance_profile_name" {

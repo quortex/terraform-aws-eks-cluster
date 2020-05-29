@@ -18,10 +18,14 @@ Get all our terraform modules on [Terraform Registry][registry_tf_modules] or on
 This module creates the following resources in AWS:
 
 - An EKS cluster: the control plane for Kubernetes
-- EKS node groups: the Kubernetes worker nodes
+- EKS node groups: the Kubernetes worker nodes. There are 2 variants of nodegroups:
+  - node_groups: creates an EKS-managed node group (more automation, less features)
+  - node_groups_advanced: creates a launch template + autoscaling group, with instances that attach to the created cluster. This provides more customization (spot instances, taints...)
 - An additional security group to grant access to a list of IP addresses
 
 ## Usage example
+
+Example that creates 1 EKS-managed node group and 1 advanced node group:
 
 ```
 module "quortex-eks" {
@@ -29,6 +33,8 @@ module "quortex-eks" {
   
   region = "eu-west-3"
   name = "quortexcluster"
+  kubernetes_version = "1.15"
+  availability_zones = ["eu-west-3b", "eu-west-3c"]
 
   # values from the Quortex network module:
   subnet_ids_master = module.network.master_subnet_ids 
@@ -45,17 +51,23 @@ module "quortex-eks" {
         scaling_desired_size = 1
         scaling_max_size     = 1
         scaling_min_size     = 1
-    },
+    }
+  }
+
+  node_groups_advanced = {
     workflow-group = {
-        instance_types = ["c5.2xlarge"] # c5.2xlarge: 8 vCPU, 16 GiB memory
-        scaling_desired_size = 2
-        scaling_max_size     = 2
-        scaling_min_size     = 2
+      image_id             = "ami-026d2ac4b345304dc"
+      instance_types       = ["c5.2xlarge","c5d.2xlarge"]
+      scaling_desired_size = 2
+      scaling_max_size     = 3
+      scaling_min_size     = 0
+      market_type          = "spot"
+      taints               = {} # example taints:  {"spotinstance":"true:PreferNoSchedule"}
+      labels               = {} 
     }
   }
 }
 ```
-
 ---
 
 ## Related Projects

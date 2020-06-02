@@ -78,8 +78,6 @@ Check out these related projects.
 
 - [terraform-aws-network][registry_tf_aws-eks_network] - A terraform module for Quortex infrastructure network layer.
 
-- [terraform-aws-eks-cluster][registry_tf_aws-eks_cluster] - A terraform module for Quortex infrastructure AWS cluster layer.
-
 - [terraform-aws-eks-load-balancer][registry_tf_aws-eks_load_balancer] - A terraform module for Quortex infrastructure AWS load balancing layer.
 
 - [terraform-aws-storage][registry_tf_aws-eks_storage] - A terraform module for Quortex infrastructure AWS persistent storage layer.
@@ -98,7 +96,6 @@ File a GitHub [issue](https://github.com/quortex/terraform-aws-eks-cluster/issue
 
   [registry_tf_modules]: https://registry.terraform.io/modules/quortex
   [registry_tf_aws-eks_network]: https://registry.terraform.io/modules/quortex/network/aws
-  [registry_tf_aws-eks_cluster]: https://registry.terraform.io/modules/quortex/eks-cluster/aws
   [registry_tf_aws-eks_load_balancer]: https://registry.terraform.io/modules/quortex/load-balancer/aws
   [registry_tf_aws-eks_storage]: https://registry.terraform.io/modules/quortex/storage/aws
   [github_tf_modules]: https://github.com/quortex?q=terraform-

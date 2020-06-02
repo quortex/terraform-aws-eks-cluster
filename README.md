@@ -1,7 +1,7 @@
 
 [![Quortex][logo]](https://quortex.io)
 
-# terraform-aws-gke-cluster
+# terraform-aws-eks-cluster
 
 A terraform module for Quortex infrastructure EKS cluster layer.
 
@@ -29,7 +29,7 @@ Example that creates 1 EKS-managed node group and 1 advanced node group:
 
 ```
 module "quortex-eks" {
-  source = "git::https://github.com/quortex/terraform-aws-eks-cluster.git"
+  source = "quortex/eks-cluster/aws"
   
   region = "eu-west-3"
   name = "quortexcluster"
@@ -88,7 +88,7 @@ Check out these related projects.
 
 **Got a question?**
 
-File a GitHub [issue](https://github.com/quortex/terraform-aws-eks-storage/issues) or send us an [email][email].
+File a GitHub [issue](https://github.com/quortex/terraform-aws-eks-cluster/issues) or send us an [email][email].
 
 
   [logo]: https://storage.googleapis.com/quortex-assets/logo.webp
@@ -97,8 +97,8 @@ File a GitHub [issue](https://github.com/quortex/terraform-aws-eks-storage/issue
   [email]: mailto:info@quortex.io
 
   [registry_tf_modules]: https://registry.terraform.io/modules/quortex
-  [registry_tf_aws-eks_network]: https://registry.terraform.io/modules/quortex/network/aws-eks
-  [registry_tf_aws-eks_cluster]: https://registry.terraform.io/modules/quortex/eks-cluster/aws-eks
-  [registry_tf_aws-eks_load_balancer]: https://registry.terraform.io/modules/quortex/load-balancer/aws-eks
-  [registry_tf_aws-eks_storage]: https://registry.terraform.io/modules/quortex/storage/aws-eks
+  [registry_tf_aws-eks_network]: https://registry.terraform.io/modules/quortex/network/aws
+  [registry_tf_aws-eks_cluster]: https://registry.terraform.io/modules/quortex/eks-cluster/aws
+  [registry_tf_aws-eks_load_balancer]: https://registry.terraform.io/modules/quortex/load-balancer/aws
+  [registry_tf_aws-eks_storage]: https://registry.terraform.io/modules/quortex/storage/aws
   [github_tf_modules]: https://github.com/quortex?q=terraform-

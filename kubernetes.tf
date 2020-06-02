@@ -53,7 +53,7 @@ resource "aws_eks_node_group" "quortex" {
   subnet_ids      = var.subnet_ids_worker
 
   scaling_config {
-    desired_size = lookup(each.value, "scaling_desired_size", 1)
+    desired_size = lookup(each.value, "scaling_desired_size", lookup(each.value, "scaling_min_size", 1))
     min_size     = lookup(each.value, "scaling_min_size", 1)
     max_size     = lookup(each.value, "scaling_max_size", 1)
   }
@@ -121,4 +121,3 @@ resource "aws_security_group" "remote_access" {
     Name = "${var.cluster_name}-ssh"
   }
 }
-

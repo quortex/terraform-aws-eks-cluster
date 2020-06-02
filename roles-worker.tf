@@ -34,10 +34,6 @@ resource "aws_iam_role" "quortex_role_worker" {
   ]
 }
 POLICY
-
-  # tags = map(
-  #   "Name", "${var.worker_role_name}",
-  # )
 }
 
 

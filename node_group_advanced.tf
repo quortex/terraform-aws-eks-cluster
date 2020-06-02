@@ -102,11 +102,10 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
   mixed_instances_policy {
 
     instances_distribution {
-      on_demand_base_capacity                  = 0
-      on_demand_percentage_above_base_capacity = 0
-      # TODO: make spot allocation strategy configurable
-      spot_allocation_strategy                 = "capacity-optimized"
-      spot_max_price                           = ""
+      on_demand_base_capacity                  = lookup(each.value, "on_demand_base_capacity", 0)
+      on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", 0)
+      spot_allocation_strategy                 = lookup(each.value, "spot_allocation_strategy", "capacity-optimized")
+      spot_max_price                           = lookup(each.value, "spot_max_price", "")
     }
 
     launch_template {

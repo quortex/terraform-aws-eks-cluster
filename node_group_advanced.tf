@@ -88,9 +88,9 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
 
   name                = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
   vpc_zone_identifier = var.subnet_ids_worker
-  desired_capacity    = each.value.scaling_desired_size
-  max_size            = each.value.scaling_max_size
-  min_size            = each.value.scaling_min_size
+  desired_capacity    = lookup(each.value, "scaling_desired_size", lookup(each.value, "scaling_min_size", 1))
+  max_size            = lookup(each.value, "scaling_max_size", 1)
+  min_size            = lookup(each.value, "scaling_min_size", 1)
 
   lifecycle {
     ignore_changes = [

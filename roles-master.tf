@@ -35,10 +35,6 @@ resource "aws_iam_role" "quortex_role_master" {
   ]
 }
 POLICY
-
-  # tags = map(
-  #   "Name", "${var.master_role_name}",
-  # )
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSClusterPolicy" {

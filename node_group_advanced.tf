@@ -29,6 +29,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
 
   image_id = each.value.image_id
+  instance_type = each.value.instance_types[0]
 
   user_data = base64encode(
     templatefile(
@@ -99,28 +100,43 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     ]
   }
 
-  mixed_instances_policy {
+  # Only for On-Demand instance groups:
+  dynamic "launch_template" {
+    for_each = each.value.market_type == "on-demand" ? [true] : []
 
-    instances_distribution {
-      on_demand_base_capacity                  = lookup(each.value, "on_demand_base_capacity", 0)
-      on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", 0)
-      spot_allocation_strategy                 = lookup(each.value, "spot_allocation_strategy", "capacity-optimized")
-      spot_max_price                           = lookup(each.value, "spot_max_price", "")
+    content {
+      id      = aws_launch_template.quortex_launch_tpl[each.key].id
+      version = "$Latest"
     }
+  }
 
-    launch_template {
-      launch_template_specification {
-        launch_template_id = aws_launch_template.quortex_launch_tpl[each.key].id
-        version            = "$Latest"
+  # Only for Spot instance groups:
+  dynamic "mixed_instances_policy" {
+    for_each = each.value.market_type == "spot" ? [true] : []
+
+    content {
+
+      instances_distribution {
+        on_demand_base_capacity                  = lookup(each.value, "on_demand_base_capacity", 0)
+        on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", 0)
+        spot_allocation_strategy                 = lookup(each.value, "spot_allocation_strategy", "capacity-optimized")
+        spot_max_price                           = lookup(each.value, "spot_max_price", "")
       }
 
-      dynamic "override" {
-        for_each = each.value.instance_types
-        content {
-          instance_type = override.value
+      launch_template {
+        launch_template_specification {
+          launch_template_id = aws_launch_template.quortex_launch_tpl[each.key].id
+          version            = "$Latest"
         }
-      }
 
+        dynamic "override" {
+          for_each = each.value.instance_types
+          content {
+            instance_type = override.value
+          }
+        }
+
+      }
     }
   }
 

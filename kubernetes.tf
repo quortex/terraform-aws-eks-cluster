@@ -83,6 +83,7 @@ resource "aws_eks_node_group" "quortex" {
       "k8s.io/cluster-autoscaler/${var.cluster_name}", "owned",
       "k8s.io/cluster-autoscaler/enabled", "true",
       "k8s.io/cluster-autoscaler/node-template/label/nodegroup", each.key, # tag required for scaling to/from 0
+      "nodegroup", each.key
     ),
     var.tags
   )

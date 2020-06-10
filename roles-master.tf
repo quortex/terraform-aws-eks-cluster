@@ -20,6 +20,7 @@
 resource "aws_iam_role" "quortex_role_master" {
   name        = var.master_role_name
   description = "IAM Role to allow EKS service to manage other AWS services"
+  tags        = var.tags
 
   assume_role_policy = <<POLICY
 {

@@ -118,7 +118,8 @@ resource "aws_security_group" "remote_access" {
     cidr_blocks = var.remote_access_allowed_ip_ranges
   }
 
-  tags = {
-    Name = "${var.cluster_name}-ssh"
-  }
+  tags = merge(
+    map("Name", "${var.cluster_name}-ssh",),
+    var.tags
+  )
 }

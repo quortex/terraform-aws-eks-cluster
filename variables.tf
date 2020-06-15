@@ -49,11 +49,6 @@ variable "kubernetes_version" {
   default     = "1.15"
 }
 
-variable "availability_zones" {
-  type        = list(string)
-  description = "The list of availability zones (AZ)"
-}
-
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC this cluster should be attached to."

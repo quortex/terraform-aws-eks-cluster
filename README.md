@@ -55,7 +55,17 @@ module "quortex-eks" {
   }
 
   node_groups_advanced = {
-    workflow-group = {
+    workflow-group-ondemand = {
+      image_id             = "ami-026d2ac4b345304dc"
+      instance_types       = ["c5.2xlarge","c5d.2xlarge"]
+      scaling_desired_size = 2
+      scaling_max_size     = 3
+      scaling_min_size     = 0
+      market_type          = "on-demand"
+      taints               = {}
+      labels               = {} 
+    }
+    workflow-group-spot = {
       image_id             = "ami-026d2ac4b345304dc"
       instance_types       = ["c5.2xlarge","c5d.2xlarge"]
       scaling_desired_size = 2
@@ -95,6 +105,7 @@ File a GitHub [issue](https://github.com/quortex/terraform-aws-eks-cluster/issue
   [email]: mailto:info@quortex.io
 
   [registry_tf_modules]: https://registry.terraform.io/modules/quortex
+  [registry_tf_aws-eks_cluster]: https://registry.terraform.io/modules/quortex/eks-cluster/aws
   [registry_tf_aws-eks_network]: https://registry.terraform.io/modules/quortex/network/aws
   [registry_tf_aws-eks_load_balancer]: https://registry.terraform.io/modules/quortex/load-balancer/aws
   [registry_tf_aws-eks_storage]: https://registry.terraform.io/modules/quortex/storage/aws

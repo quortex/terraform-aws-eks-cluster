@@ -83,6 +83,7 @@ resource "aws_eks_node_group" "quortex" {
       "k8s.io/cluster-autoscaler/${var.cluster_name}", "owned",
       "k8s.io/cluster-autoscaler/enabled", "true",
       "k8s.io/cluster-autoscaler/node-template/label/nodegroup", each.key, # tag required for scaling to/from 0
+      "nodegroup", each.key
     ),
     var.tags
   )
@@ -117,7 +118,8 @@ resource "aws_security_group" "remote_access" {
     cidr_blocks = var.remote_access_allowed_ip_ranges
   }
 
-  tags = {
-    Name = "${var.cluster_name}-ssh"
-  }
+  tags = merge(
+    map("Name", "${var.cluster_name}-ssh",),
+    var.tags
+  )
 }

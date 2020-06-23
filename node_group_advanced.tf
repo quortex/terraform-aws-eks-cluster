@@ -95,7 +95,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
   for_each = var.node_groups_advanced
 
   name                = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
-  vpc_zone_identifier = var.subnet_ids_worker
+  vpc_zone_identifier = length(var.subnet_ids_worker) != 0 ? var.subnet_ids_worker : var.subnet_ids
   desired_capacity    = lookup(each.value, "scaling_desired_size", lookup(each.value, "scaling_min_size", 1))
   max_size            = lookup(each.value, "scaling_max_size", 1)
   min_size            = lookup(each.value, "scaling_min_size", 1)

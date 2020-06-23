@@ -54,14 +54,15 @@ variable "vpc_id" {
   description = "ID of the VPC this cluster should be attached to."
 }
 
-variable "subnet_ids_master" {
+variable "subnet_ids" {
   type        = list(string)
-  description = "The IDs of the subnets for the master nodes"
+  description = "The IDs of the subnets where nodes should be placed"
 }
 
 variable "subnet_ids_worker" {
   type        = list(string)
-  description = "The IDs of the subnets for the worker nodes"
+  description = "The IDs of the subnets where worker nodes should be placed. By default, the subnets are subnet_ids"
+  default     = []
 }
 
 variable "master_authorized_networks" {

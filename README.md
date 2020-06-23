@@ -55,7 +55,6 @@ module "quortex-eks" {
 
   node_groups_advanced = {
     workflow-group-ondemand = {
-      image_id             = "ami-026d2ac4b345304dc"
       instance_types       = ["c5.2xlarge","c5d.2xlarge"]
       scaling_desired_size = 2
       scaling_max_size     = 3
@@ -65,7 +64,6 @@ module "quortex-eks" {
       labels               = {} 
     }
     workflow-group-spot = {
-      image_id             = "ami-026d2ac4b345304dc"
       instance_types       = ["c5.2xlarge","c5d.2xlarge"]
       scaling_desired_size = 2
       scaling_max_size     = 3
@@ -77,6 +75,13 @@ module "quortex-eks" {
   }
 }
 ```
+
+## Cluster node image
+
+By default, when using node-groups-advanced, the image for the worker nodes instances is the latest AMI found whose name matches \"amazon-eks-node-`<kubernetes_cluster_version>`-v*\". The image ID can be overriden using `kubernetes_cluster_image_id`.
+
+When using EKS-managed nodes, the image version is selected by EKS based on `kubernetes_cluster_version`.
+
 ---
 
 ## Related Projects

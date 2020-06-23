@@ -21,6 +21,19 @@ resource "aws_iam_instance_profile" "quortex" {
   role = aws_iam_role.quortex_role_worker.name
 }
 
+data "aws_ami" "eks_worker_image" {
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-${var.kubernetes_cluster_version}-v*"]
+  }
+  most_recent = true
+  owners = ["self", "amazon"]
+}
+
+locals {
+  ami_id_worker = coalesce(var.kubernetes_cluster_image_id, data.aws_ami.eks_worker_image.id)
+}
+
 
 # One launch template per node group
 resource "aws_launch_template" "quortex_launch_tpl" {
@@ -28,7 +41,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 
   name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
 
-  image_id = each.value.image_id
+  image_id = local.ami_id_worker
   instance_type = each.value.instance_types[0]
 
   user_data = base64encode(
@@ -47,7 +60,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
             merge(
               # Built-in labels
               map(
-                "eks.amazonaws.com/nodegroup-image", each.value.image_id,
+                "eks.amazonaws.com/nodegroup-image", local.ami_id_worker,
                 "eks.amazonaws.com/nodegroup", each.key,
                 "nodegroup", each.key
               ),

@@ -48,6 +48,7 @@ resource "aws_eks_node_group" "quortex" {
   for_each = var.node_groups
 
   cluster_name    = aws_eks_cluster.quortex.name
+  version         = var.kubernetes_cluster_version
   node_group_name = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
   node_role_arn   = aws_iam_role.quortex_role_worker.arn
   subnet_ids      = length(var.subnet_ids_worker) != 0 ? var.subnet_ids_worker : var.subnet_ids

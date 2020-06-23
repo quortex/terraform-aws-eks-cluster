@@ -49,19 +49,32 @@ variable "kubernetes_version" {
   default     = "1.15"
 }
 
+variable "kubernetes_cluster_version" {
+  type        = string
+  description = "Kubernetes version for worker nodes"
+  default     = "1.15"
+}
+
+variable "kubernetes_cluster_image_id" {
+  type        = string
+  description = "ID of the AMI to use for worker nodes (applies only to advanced_node_groups). If not defined, the latest AMI whose name matches \"amazon-eks-node-<kubernetes_cluster_version>-v*\" will be used"
+  default     = null
+}
+
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC this cluster should be attached to."
 }
 
-variable "subnet_ids_master" {
+variable "subnet_ids" {
   type        = list(string)
-  description = "The IDs of the subnets for the master nodes"
+  description = "The IDs of the subnets where nodes should be placed"
 }
 
 variable "subnet_ids_worker" {
   type        = list(string)
-  description = "The IDs of the subnets for the worker nodes"
+  description = "The IDs of the subnets where worker nodes should be placed. By default, the subnets are subnet_ids"
+  default     = []
 }
 
 variable "master_authorized_networks" {

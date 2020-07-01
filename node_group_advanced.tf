@@ -27,7 +27,7 @@ data "aws_ami" "eks_worker_image" {
     values = ["amazon-eks-node-${var.kubernetes_cluster_version}-v*"]
   }
   most_recent = true
-  owners = ["self", "amazon"]
+  owners      = ["self", "amazon"]
 }
 
 locals {
@@ -41,7 +41,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 
   name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
 
-  image_id = local.ami_id_worker
+  image_id      = local.ami_id_worker
   instance_type = each.value.instance_types[0]
 
   user_data = base64encode(
@@ -112,6 +112,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
   desired_capacity    = lookup(each.value, "scaling_desired_size", lookup(each.value, "scaling_min_size", 1))
   max_size            = lookup(each.value, "scaling_max_size", 1)
   min_size            = lookup(each.value, "scaling_min_size", 1)
+  enabled_metrics     = lookup(each.value, "enabled_metrics", [])
 
   lifecycle {
     ignore_changes = [

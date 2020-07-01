@@ -120,7 +120,7 @@ resource "aws_security_group" "remote_access" {
   }
 
   tags = merge(
-    map("Name", "${var.cluster_name}-ssh",),
+    map("Name", "${var.cluster_name}-ssh"),
     var.tags
   )
 }

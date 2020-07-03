@@ -171,7 +171,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
   tag {
     key                 = "k8s.io/cluster-autoscaler/enabled"
     propagate_at_launch = true
-    value               = "true"
+    value               = lookup(each.value, "cluster_autoscaler_enabled", true)
   }
   tag {
     key                 = "k8s.io/cluster-autoscaler/${var.cluster_name}"

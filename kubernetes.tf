@@ -82,7 +82,7 @@ resource "aws_eks_node_group" "quortex" {
     map(
       # tag the node group so that it can be auto-discovered by the cluster autoscaler
       "k8s.io/cluster-autoscaler/${var.cluster_name}", "owned",
-      "k8s.io/cluster-autoscaler/enabled", "true",
+      "k8s.io/cluster-autoscaler/enabled", lookup(each.value, "cluster_autoscaler_enabled", true),
       "k8s.io/cluster-autoscaler/node-template/label/nodegroup", each.key, # tag required for scaling to/from 0
       "nodegroup", each.key
     ),

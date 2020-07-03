@@ -91,7 +91,7 @@ variable "tags" {
 
 variable "node_groups" {
   type        = map(any)
-  description = "EKS-managed node groups. The nodes are attached automatically to the cluster via EKS. Defined as a map where the key defines the node group name, and the value is a map defining instance_types, scaling_desired_size, scaling_min_size, scaling_max_size, disk_size"
+  description = "EKS-managed node groups. The nodes are attached automatically to the cluster via EKS. Defined as a map where the key defines the node group name, and the value is a map defining instance_types, scaling_desired_size, scaling_min_size, scaling_max_size, disk_size, cluster_autoscaler_enabled"
 }
 
 variable "node_groups_advanced" {

@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-output "autoscaling_group_names" {
-  value = concat(
-    # Retrieve the autoscaling group names from the EKS-managed node groups
-    flatten(
-      [for node_group in aws_eks_node_group.quortex : [for r in node_group.resources : [for g in r.autoscaling_groups : g.name]]]
-    ),
-    # Retrieve the non-managed autoscaling group names
-    [for name, v in aws_autoscaling_group.quortex_asg_advanced : v.name]
-  )
-  description = "The names of the created autoscaling groups"
+output "node_groups_names" {
+  value       = { for k, v in aws_eks_node_group.quortex : k => v.node_group_name }
+  description = "A map with node groups names for each node_groups provided in variables."
+}
+
+output "autoscaling_groups_names" {
+  value       = { for k, v in aws_autoscaling_group.quortex_asg_advanced : k => v.name }
+  description = "A map with autoscaling groups names for each node_groups_advanced provided in variables."
 }
 
 output "cluster_security_group_id" {

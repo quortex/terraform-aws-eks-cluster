@@ -168,17 +168,6 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     value               = var.cluster_name
   }
 
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/enabled"
-    propagate_at_launch = true
-    value               = lookup(each.value, "cluster_autoscaler_enabled", true)
-  }
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/${var.cluster_name}"
-    propagate_at_launch = true
-    value               = "owned"
-  }
-
   # Tag required to join the cluster
   tag {
     key                 = "kubernetes.io/cluster/${var.cluster_name}"
@@ -187,42 +176,29 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
   }
 
   # built-in labels
-
   tag {
     key                 = "nodegroup"
     value               = each.key
     propagate_at_launch = true
   }
 
-  tag { # tag required for scaling to/from 0
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/nodegroup"
-    value               = each.key
-    propagate_at_launch = true
-  }
-
-
-  # user-defined labels
+  # cluster-autoscaler related tags
   dynamic "tag" {
-    for_each = lookup(each.value, "labels", {})
-    iterator = label
+    for_each = lookup(each.value, "cluster_autoscaler_enabled", true) ? merge(
+      {
+        "k8s.io/cluster-autoscaler/enabled"                       = true
+        "k8s.io/cluster-autoscaler/${var.cluster_name}"           = "owned"
+        "k8s.io/cluster-autoscaler/node-template/label/nodegroup" = each.key
+      },
+      { for k, v in lookup(each.value, "labels", {}) : "k8s.io/cluster-autoscaler/node-template/label/${k}" => v },
+      { for k, v in lookup(each.value, "taints", {}) : "k8s.io/cluster-autoscaler/node-template/taint/${k}" => v }
+    ) : {}
+    iterator = tag
 
     content {
-      key                 = "k8s.io/cluster-autoscaler/node-template/label/${label.key}"
-      value               = label.value
+      key                 = tag.key
+      value               = tag.value
       propagate_at_launch = true
     }
   }
-
-  # taints
-  dynamic "tag" {
-    for_each = lookup(each.value, "taints", {})
-    iterator = taint
-
-    content {
-      key                 = "k8s.io/cluster-autoscaler/node-template/taint/${taint.key}"
-      value               = taint.value
-      propagate_at_launch = true
-    }
-  }
-
 }

@@ -26,6 +26,16 @@ output "autoscaling_group_names" {
   description = "The names of the created autoscaling groups"
 }
 
+output "node_groups_names" {
+  value       = { for k, v in aws_eks_node_group.quortex : k => v.node_group_name }
+  description = "A map with node groups names for each node_groups provided in variables."
+}
+
+output "autoscaling_groups_names" {
+  value       = { for k, v in aws_autoscaling_group.quortex_asg_advanced : k => v.name }
+  description = "A map with autoscaling groups names for each node_groups_advanced provided in variables."
+}
+
 output "cluster_security_group_id" {
   value       = aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id
   description = "The cluster security group that was created by Amazon EKS for the cluster."

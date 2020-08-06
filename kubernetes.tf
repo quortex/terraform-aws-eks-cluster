@@ -62,7 +62,7 @@ resource "aws_eks_node_group" "quortex" {
   lifecycle {
     ignore_changes = [
       # ignore changes to the cluster size, because it can be changed by autoscaling
-      scaling_config["desired_size"],
+      scaling_config.0.desired_size,
     ]
   }
 

@@ -116,3 +116,9 @@ variable "remote_access_allowed_ip_ranges" {
   description = "List of IP CIDR blocks allowed to access the nodes via SSH"
   default     = []
 }
+
+variable "add_cloudwatch_permissions" {
+  type        = bool
+  description = "If true, the CloudWatch permissions will be added to the worker node role"
+  default     = false
+}

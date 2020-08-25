@@ -41,6 +41,17 @@ output "cluster_security_group_id" {
   description = "The cluster security group that was created by Amazon EKS for the cluster."
 }
 
+output "cluster_certificate_authority_data" {
+  value       = aws_eks_cluster.quortex.certificate_authority.0.data
+  description = "The base64 encoded certificate data required to communicate with the cluster."
+  sensitive   = true
+}
+
+output "cluster_endpoint" {
+  value       = aws_eks_cluster.quortex.endpoint
+  description = "The endpoint for the Kubernetes API server."
+}
+
 output "worker_role_arn" {
   value       = aws_iam_role.quortex_role_worker.arn
   description = "The ARN identifier of the role created in AWS for allowing the worker nodes to make calls to the AWS APIs"

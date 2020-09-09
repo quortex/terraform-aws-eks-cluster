@@ -182,6 +182,13 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     propagate_at_launch = true
   }
 
+  # tag the ASG with "spot" key
+  tag {
+    key                 = "spot"
+    value               = each.value.market_type == "spot" ? "yes" : "no"
+    propagate_at_launch = false
+  }
+
   # cluster-autoscaler related tags
   dynamic "tag" {
     for_each = lookup(each.value, "cluster_autoscaler_enabled", true) ? merge(

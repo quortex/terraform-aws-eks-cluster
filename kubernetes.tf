@@ -23,7 +23,7 @@ resource "aws_eks_cluster" "quortex" {
   version  = var.kubernetes_version
 
   vpc_config {
-    subnet_ids = var.subnet_ids
+    subnet_ids = var.master_subnet_ids
 
     # Public endpoint: enabled but restricted to an IP range list
     endpoint_public_access = true
@@ -51,7 +51,7 @@ resource "aws_eks_node_group" "quortex" {
   version         = var.kubernetes_cluster_version
   node_group_name = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
   node_role_arn   = aws_iam_role.quortex_role_worker.arn
-  subnet_ids      = length(var.subnet_ids_worker) != 0 ? var.subnet_ids_worker : var.subnet_ids
+  subnet_ids      = lookup(each.value, "public", false) ? var.worker_public_subnet_ids : var.worker_private_subnet_ids
 
   scaling_config {
     desired_size = lookup(each.value, "scaling_desired_size", lookup(each.value, "scaling_min_size", 1))

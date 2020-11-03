@@ -66,14 +66,21 @@ variable "vpc_id" {
   description = "ID of the VPC this cluster should be attached to."
 }
 
-variable "subnet_ids" {
+variable "master_subnet_ids" {
   type        = list(string)
-  description = "The IDs of the subnets where nodes should be placed"
+  description = "The IDs of the subnets where master should be placed"
+  default     = []
 }
 
-variable "subnet_ids_worker" {
+variable "worker_public_subnet_ids" {
   type        = list(string)
-  description = "The IDs of the subnets where worker nodes should be placed. By default, the subnets are subnet_ids"
+  description = "The IDs of the subnets where public worker nodes should be placed"
+  default     = []
+}
+
+variable "worker_private_subnet_ids" {
+  type        = list(string)
+  description = "The IDs of the subnets where private worker nodes should be placed"
   default     = []
 }
 

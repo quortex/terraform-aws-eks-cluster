@@ -37,8 +37,10 @@ module "quortex-eks" {
   availability_zones = ["eu-west-3b", "eu-west-3c"]
 
   # values from the Quortex network module:
-  subnet_ids = module.network.private_subnet_ids 
-  vpc_id     = module.network.vpc_id
+  master_subnet_ids         = module.network.private_subnet_ids
+  worker_public_subnet_ids  = module.network.public_subnet_ids
+  worker_private_subnet_ids = module.network.private_subnet_ids
+  vpc_id                    = module.network.vpc_id
   
   master_authorized_networks = {
     myipaddress = "98.235.24.130/32"

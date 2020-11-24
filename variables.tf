@@ -51,8 +51,12 @@ variable "kubernetes_version" {
 
 variable "kubernetes_cluster_version" {
   type        = string
-  description = "Kubernetes version for worker nodes"
-  default     = "1.15"
+  description = "Kubernetes version for worker nodes. An empty string means the same Kubernetes version as the master's"
+  default     = ""
+}
+
+locals {
+  kubernetes_cluster_version = var.kubernetes_cluster_version == "" ? var.kubernetes_version : var.kubernetes_cluster_version
 }
 
 variable "kubernetes_cluster_image_id" {

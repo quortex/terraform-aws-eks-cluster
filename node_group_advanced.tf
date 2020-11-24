@@ -24,7 +24,7 @@ resource "aws_iam_instance_profile" "quortex" {
 data "aws_ami" "eks_worker_image" {
   filter {
     name   = "name"
-    values = ["amazon-eks-node-${var.kubernetes_cluster_version}-v*"]
+    values = ["amazon-eks-node-${local.kubernetes_cluster_version}-v*"]
   }
   most_recent = true
   owners      = ["self", "amazon"]
@@ -142,6 +142,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
         on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", 0)
         spot_allocation_strategy                 = lookup(each.value, "spot_allocation_strategy", "capacity-optimized")
         spot_max_price                           = lookup(each.value, "spot_max_price", "")
+        spot_instance_pools                      = lookup(each.value, "spot_instance_pools", 0)
       }
 
       launch_template {

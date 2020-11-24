@@ -81,7 +81,7 @@ module "quortex-eks" {
       scaling_max_size           = 3
       scaling_min_size           = 0
       market_type                = "spot"
-      spot_allocation_strategy   = "capacity-optimized"   # can be "capacity-optimized" (prefer instance types with lowest chances of interruption) or "lowest-price" (prefere the cheapest instance types)
+      spot_allocation_strategy   = "capacity-optimized"   # can be "capacity-optimized" (prefer instance types with lowest chances of interruption) or "lowest-price" (prefer the cheapest instance types)
       spot_max_price             = ""                     # default max is the on-demand price
       spot_instance_pools        = 0                      # the number of pools across which to allocate your Spot Instances. The pools are determined from the different instance types. Should be between 1 and the number of instance types. Valid only when the Spot allocation strategy is "lowest-price". Should be set to 0 with "capacity-optimized".
       cluster_autoscaler_enabled = true

@@ -142,6 +142,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
         on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", 0)
         spot_allocation_strategy                 = lookup(each.value, "spot_allocation_strategy", "capacity-optimized")
         spot_max_price                           = lookup(each.value, "spot_max_price", "")
+        spot_instance_pools                      = lookup(each.value, "spot_instance_pools", 0)
       }
 
       launch_template {

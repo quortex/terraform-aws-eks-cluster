@@ -25,9 +25,9 @@ This module creates the following resources in AWS:
 
 ## Usage example
 
-Example that creates 1 EKS-managed node group and 1 advanced node group:
+Example that creates 1 EKS-managed node group and 2 advanced node group (one On-Demand group and one Spot group):
 
-```
+```hcl
 module "quortex-eks" {
   source = "quortex/eks-cluster/aws"
   
@@ -48,35 +48,52 @@ module "quortex-eks" {
 
   node_groups = {
     main = {
-        instance_types = ["t3.medium"] # t3.medium: 2 vCPU, 4GiB
-        scaling_desired_size = 1
-        scaling_max_size     = 1
-        scaling_min_size     = 1
+      public               = false
+      instance_types       = ["t3.medium"] # t3.medium: 2 vCPU, 4GiB
+      scaling_desired_size = 1
+      scaling_max_size     = 1
+      scaling_min_size     = 1
     }
   }
 
   node_groups_advanced = {
+    # Example of On-Demand node group:
     workflow-group-ondemand = {
-      instance_types       = ["c5.2xlarge","c5d.2xlarge"]
-      scaling_desired_size = 2
-      scaling_max_size     = 3
-      scaling_min_size     = 0
-      market_type          = "on-demand"
-      taints               = {}
-      labels               = {} 
+      public                     = false
+      instance_types             = ["c5.2xlarge","c5d.2xlarge"]
+      scaling_desired_size       = 2
+      scaling_max_size           = 3
+      scaling_min_size           = 0
+      market_type                = "on-demand"
+      spot_allocation_strategy   = ""     # not used when market_type is "on-demand", only for spot
+      spot_max_price             = ""     # not used when market_type is "on-demand", only for spot
+      spot_instance_pools        = 0      # not used when market_type is "on-demand", only for spot
+      cluster_autoscaler_enabled = true
+      enabled_metrics            = []
+      taints                     = {}
+      labels                     = {} 
     }
+    # Example of Spot node group:
     workflow-group-spot = {
-      instance_types       = ["c5.2xlarge","c5d.2xlarge"]
-      scaling_desired_size = 2
-      scaling_max_size     = 3
-      scaling_min_size     = 0
-      market_type          = "spot"
-      taints               = {} # example taints:  {"spotinstance":"true:PreferNoSchedule"}
-      labels               = {} 
+      public                     = false
+      instance_types             = ["c5.2xlarge","c5d.2xlarge"]
+      scaling_desired_size       = 2
+      scaling_max_size           = 3
+      scaling_min_size           = 0
+      market_type                = "spot"
+      spot_allocation_strategy   = "capacity-optimized"   # can be "capacity-optimized" (prefer instance types with lowest chances of interruption) or "lowest-price" (prefere the cheapest instance types)
+      spot_max_price             = ""                     # default max is the on-demand price
+      spot_instance_pools        = 0                      # the number of pools across which to allocate your Spot Instances. The pools are determined from the different instance types. Should be between 1 and the number of instance types. Valid only when the Spot allocation strategy is "lowest-price". Should be set to 0 with "capacity-optimized".
+      cluster_autoscaler_enabled = true
+      enabled_metrics            = []
+      taints                     = {} # example taints:  {"spotinstance":"true:PreferNoSchedule"}
+      labels                     = {} 
     }
   }
 }
 ```
+
+Note: all items of `node_groups` or `node_groups_advanced` must have the same keys defined (but not necessarily the same values).
 
 ## Cluster node image
 

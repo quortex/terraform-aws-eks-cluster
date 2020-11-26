@@ -60,7 +60,14 @@ module "quortex-eks" {
     # Example of On-Demand node group:
     workflow-group-ondemand = {
       public                     = false
-      instance_types             = ["c5.2xlarge","c5d.2xlarge"]
+      instance_types             = [
+        {
+          type = "c5.xlarge"
+        },
+        {
+          type = "c5.2xlarge"
+        }
+      ]
       scaling_desired_size       = 2
       scaling_max_size           = 3
       scaling_min_size           = 0
@@ -76,7 +83,16 @@ module "quortex-eks" {
     # Example of Spot node group:
     workflow-group-spot = {
       public                     = false
-      instance_types             = ["c5.2xlarge","c5d.2xlarge"]
+      instance_types             = [
+        {
+          type = "c5.xlarge"
+          weighted_capacity = 1
+        },
+        {
+          type = "c5.2xlarge"
+          weighted_capacity = 2
+        }
+      ]
       scaling_desired_size       = 2
       scaling_max_size           = 3
       scaling_min_size           = 0

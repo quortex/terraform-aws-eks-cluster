@@ -42,7 +42,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
 
   image_id      = local.ami_id_worker
-  instance_type = each.value.instance_types[0]
+  instance_type = each.value.instance_types[0].type
 
   user_data = base64encode(
     templatefile(
@@ -151,10 +151,12 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
           version            = "$Latest"
         }
 
+        # These multiple instance types "override" the single instance type defined in the launch template
         dynamic "override" {
           for_each = each.value.instance_types
           content {
-            instance_type = override.value
+            instance_type = override.value.type
+            weighted_capacity = lookup(override.value, "weighted_capacity", null)
           }
         }
 

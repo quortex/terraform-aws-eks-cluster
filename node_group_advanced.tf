@@ -52,7 +52,9 @@ resource "aws_launch_template" "quortex_launch_tpl" {
         base64_cluster_ca       = aws_eks_cluster.quortex.certificate_authority[0].data
         api_server_url          = aws_eks_cluster.quortex.endpoint
         kubelet_more_extra_args = ""
+        // define the k8s node taints (passed to --kubelet-extra-args)
         node_taints             = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
+        // define the k8s node labels (passed to --kubelet-extra-args)
         node_labels = join(
           ",",
           [
@@ -193,13 +195,17 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
   # cluster-autoscaler related tags
   dynamic "tag" {
     for_each = lookup(each.value, "cluster_autoscaler_enabled", true) ? merge(
+      // these tags are used to enable autoscaling for this ASG:
       {
         "k8s.io/cluster-autoscaler/enabled"                       = true
         "k8s.io/cluster-autoscaler/${var.cluster_name}"           = "owned"
         "k8s.io/cluster-autoscaler/node-template/label/nodegroup" = each.key
       },
+      // the following tags must be set on the ASG, and must match the k8s node labels/taints, for the autoscaler to be able to scale up from 0
       { for k, v in lookup(each.value, "labels", {}) : "k8s.io/cluster-autoscaler/node-template/label/${k}" => v },
-      { for k, v in lookup(each.value, "taints", {}) : "k8s.io/cluster-autoscaler/node-template/taint/${k}" => v }
+      { for k, v in lookup(each.value, "taints", {}) : "k8s.io/cluster-autoscaler/node-template/taint/${k}" => v },
+      // these are the global tags that are set on all AWS resources created by this terraform module:
+      { for k, v in var.tags: k => v }
     ) : {}
     iterator = tag
 

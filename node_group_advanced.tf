@@ -205,7 +205,9 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
       },
       // the following tags must be set on the ASG, and must match the k8s node labels/taints, for the autoscaler to be able to scale up from 0
       { for k, v in lookup(each.value, "labels", {}) : "k8s.io/cluster-autoscaler/node-template/label/${k}" => v },
-      { for k, v in lookup(each.value, "taints", {}) : "k8s.io/cluster-autoscaler/node-template/taint/${k}" => v }
+      { for k, v in lookup(each.value, "taints", {}) : "k8s.io/cluster-autoscaler/node-template/taint/${k}" => v },
+      // these are the global tags that are set on all AWS resources created by this terraform module:
+      { for k, v in var.tags: k => v }
     ) : {}
     iterator = tag
 

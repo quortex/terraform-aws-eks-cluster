@@ -77,6 +77,7 @@ module "quortex-eks" {
     workflow-group-spot = {
       public                     = false
       instance_types             = ["c5.2xlarge","c5d.2xlarge"]
+      instance_filter            = "AVAILABLE" # can be "AVAILABLE" (filter available instances in region), "PREFERRED" (a single available instance from an ordered list of preference) or "ALL" (no filter)
       scaling_desired_size       = 2
       scaling_max_size           = 3
       scaling_min_size           = 0

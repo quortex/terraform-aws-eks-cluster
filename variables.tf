@@ -95,7 +95,7 @@ variable "master_authorized_networks" {
 }
 
 variable "tags" {
-  type        = map
+  type        = map(any)
   description = "The EKS resource tags (a map of key/value pairs) to be applied to the cluster."
   default     = {}
 }

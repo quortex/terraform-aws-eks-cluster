@@ -14,6 +14,49 @@
  * limitations under the License.
 */
 
+locals {
+  # instance filters
+  # ALL => dont filter instances
+  # PREFERRED => returns a single instance type available in the region from an ordered list of preference
+  # AVAILABLE => filter instance types to keep only those available in the region
+  filter_all       = "ALL"
+  filter_preferred = "PREFERRED"
+  filter_available = "AVAILABLE"
+
+  # node_groups_advanced filter by instance_filter
+  filtered_nodegroups_advanced_preferred = { for k, v in var.node_groups_advanced : k => v if lookup(v, "instance_filter", local.filter_all) == local.filter_preferred }
+  filtered_nodegroups_advanced_available = { for k, v in var.node_groups_advanced : k => v if lookup(v, "instance_filter", local.filter_all) == local.filter_available }
+
+  # # node_groups_advanced with filtered instance_types
+  filtered_node_groups_advanced = { for k, v in var.node_groups_advanced : k =>
+    lookup(v, "instance_filter", local.filter_all) == local.filter_preferred ? merge(v, map("instance_types", [data.aws_ec2_instance_type_offering.preferred[k].instance_type])) :
+    lookup(v, "instance_filter", local.filter_all) == local.filter_available ? merge(v, map("instance_types", data.aws_ec2_instance_type_offerings.available[k].instance_types)) :
+    v
+  }
+}
+
+# Get preferred instance types for node_groups_advanced with instance_filter preferred
+data "aws_ec2_instance_type_offering" "preferred" {
+  for_each = local.filtered_nodegroups_advanced_preferred
+
+  filter {
+    name   = "instance-type"
+    values = each.value.instance_types
+  }
+
+  preferred_instance_types = each.value.instance_types
+}
+
+# Get available instance types for node_groups_advanced with instance_filter available
+data "aws_ec2_instance_type_offerings" "available" {
+  for_each = local.filtered_nodegroups_advanced_available
+
+  filter {
+    name   = "instance-type"
+    values = each.value.instance_types
+  }
+}
+
 # Common resources
 
 resource "aws_iam_instance_profile" "quortex" {
@@ -37,7 +80,7 @@ locals {
 
 # One launch template per node group
 resource "aws_launch_template" "quortex_launch_tpl" {
-  for_each = var.node_groups_advanced
+  for_each = local.filtered_node_groups_advanced
 
   name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
 
@@ -53,7 +96,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
         api_server_url          = aws_eks_cluster.quortex.endpoint
         kubelet_more_extra_args = ""
         // define the k8s node taints (passed to --kubelet-extra-args)
-        node_taints             = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
+        node_taints = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
         // define the k8s node labels (passed to --kubelet-extra-args)
         node_labels = join(
           ",",
@@ -107,7 +150,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 
 # For each node group, create an autoscaling group based on the launch template
 resource "aws_autoscaling_group" "quortex_asg_advanced" {
-  for_each = var.node_groups_advanced
+  for_each = local.filtered_node_groups_advanced
 
   name                = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
   vpc_zone_identifier = lookup(each.value, "public", false) ? var.worker_public_subnet_ids : var.worker_private_subnet_ids
@@ -159,7 +202,6 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
             instance_type = override.value
           }
         }
-
       }
     }
   }
@@ -205,7 +247,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
       { for k, v in lookup(each.value, "labels", {}) : "k8s.io/cluster-autoscaler/node-template/label/${k}" => v },
       { for k, v in lookup(each.value, "taints", {}) : "k8s.io/cluster-autoscaler/node-template/taint/${k}" => v },
       // these are the global tags that are set on all AWS resources created by this terraform module:
-      { for k, v in var.tags: k => v }
+      { for k, v in var.tags : k => v }
     ) : {}
     iterator = tag
 

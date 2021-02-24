@@ -18,6 +18,7 @@
 # IAM Role to allow EKS service to manage other AWS services
 
 resource "aws_iam_role" "quortex_role_master" {
+  count       = var.handle_iam_resources ? 1 : 0
   name        = var.master_role_name
   description = "IAM Role to allow EKS service to manage other AWS services"
   tags        = var.tags
@@ -39,11 +40,13 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSClusterPolicy" {
+  count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.quortex_role_master.name
+  role       = aws_iam_role.quortex_role_master[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSServicePolicy" {
+  count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.quortex_role_master.name
+  role       = aws_iam_role.quortex_role_master[0].name
 }

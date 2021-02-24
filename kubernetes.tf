@@ -19,7 +19,7 @@
 
 resource "aws_eks_cluster" "quortex" {
   name     = var.cluster_name
-  role_arn = aws_iam_role.quortex_role_master.arn
+  role_arn = var.handle_iam_resources ? aws_iam_role.quortex_role_master[0].arn : var.master_role_arn
   version  = var.kubernetes_version
 
   vpc_config {
@@ -50,7 +50,7 @@ resource "aws_eks_node_group" "quortex" {
   cluster_name    = aws_eks_cluster.quortex.name
   version         = var.kubernetes_cluster_version
   node_group_name = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
-  node_role_arn   = aws_iam_role.quortex_role_worker.arn
+  node_role_arn   = var.handle_iam_resources ? aws_iam_role.quortex_role_worker[0].arn : var.worker_role_arn
   subnet_ids      = lookup(each.value, "public", false) ? var.worker_public_subnet_ids : var.worker_private_subnet_ids
 
   scaling_config {

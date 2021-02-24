@@ -17,6 +17,7 @@
 # IAM Role to allow the worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster.
 
 resource "aws_iam_role" "quortex_role_worker" {
+  count       = var.handle_iam_resources ? 1 : 0
   name        = var.worker_role_name
   description = "IAM Role to allow the worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster."
   tags        = var.tags
@@ -41,23 +42,27 @@ POLICY
 # IAM role policies
 
 resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSWorkerNodePolicy" {
+  count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.quortex_role_worker.name
+  role       = aws_iam_role.quortex_role_worker[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-AmazonEKS_CNI_Policy" {
+  count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.quortex_role_worker.name
+  role       = aws_iam_role.quortex_role_worker[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-AmazonEC2ContainerRegistryReadOnly" {
+  count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.quortex_role_worker.name
+  role       = aws_iam_role.quortex_role_worker[0].name
 }
 
 ### Attach a new policy for the cluster-autoscaler to the worker role
 
 resource "aws_iam_policy" "quortex-autoscaler-policy" {
+  count       = var.handle_iam_resources ? 1 : 0
   description = "Allow the cluster autoscaler to make calls to the AWS APIs."
 
   policy = <<POLICY
@@ -83,14 +88,15 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-autoscaler-policy-attach" {
-  role       = aws_iam_role.quortex_role_worker.name
-  policy_arn = aws_iam_policy.quortex-autoscaler-policy.arn
+  count      = var.handle_iam_resources ? 1 : 0
+  role       = aws_iam_role.quortex_role_worker[0].name
+  policy_arn = aws_iam_policy.quortex-autoscaler-policy[0].arn
 }
 
 ### Attach a new policy for the cloudwatch-exporter to the worker role
 
 resource "aws_iam_policy" "quortex-cloudwatch-policy" {
-  count = var.add_cloudwatch_permissions ? 1 : 0
+  count = var.handle_iam_resources && var.add_cloudwatch_permissions ? 1 : 0
 
   description = "Allow the cloudwatch-exporter to make calls to the AWS CloudWatch APIs."
 
@@ -114,8 +120,8 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "quortex-cloudwatch-policy-attach" {
-  count = var.add_cloudwatch_permissions ? 1 : 0
+  count = var.handle_iam_resources && var.add_cloudwatch_permissions ? 1 : 0
 
-  role       = aws_iam_role.quortex_role_worker.name
+  role       = aws_iam_role.quortex_role_worker[0].name
   policy_arn = aws_iam_policy.quortex-cloudwatch-policy[0].arn
 }

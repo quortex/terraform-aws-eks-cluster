@@ -31,7 +31,6 @@ Example that creates 1 EKS-managed node group and 2 advanced node group (one On-
 module "quortex-eks" {
   source = "quortex/eks-cluster/aws"
   
-  region             = "eu-west-3"
   name               = "quortexcluster"
   kubernetes_version = "1.15"
   availability_zones = ["eu-west-3b", "eu-west-3c"]

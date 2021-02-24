@@ -38,11 +38,6 @@ variable "autoscaler_role_name" {
   default     = "quortex-autoscaler"
 }
 
-variable "region" {
-  type        = string
-  description = "The AWS region in wich to create network regional resources (subnet, router, nat...)."
-}
-
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes master version."

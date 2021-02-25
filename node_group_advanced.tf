@@ -60,8 +60,9 @@ data "aws_ec2_instance_type_offerings" "available" {
 # Common resources
 
 resource "aws_iam_instance_profile" "quortex" {
-  name = var.instance_profile_name
-  role = aws_iam_role.quortex_role_worker.name
+  count = var.handle_iam_resources ? 1 : 0
+  name  = var.instance_profile_name
+  role  = aws_iam_role.quortex_role_worker[0].name
 }
 
 data "aws_ami" "eks_worker_image" {
@@ -129,7 +130,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   }
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.quortex.name
+    name = var.handle_iam_resources ? aws_iam_instance_profile.quortex[0].name : var.instance_profile_name
   }
 
   vpc_security_group_ids = flatten([

@@ -53,6 +53,6 @@ output "cluster_endpoint" {
 }
 
 output "worker_role_arn" {
-  value       = aws_iam_role.quortex_role_worker.arn
+  value       = length(aws_iam_role.quortex_role_worker) > 0 ? aws_iam_role.quortex_role_worker[0].arn : null
   description = "The ARN identifier of the role created in AWS for allowing the worker nodes to make calls to the AWS APIs"
 }

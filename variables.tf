@@ -128,3 +128,21 @@ variable "add_cloudwatch_permissions" {
   description = "If true, the CloudWatch permissions will be added to the worker node role"
   default     = false
 }
+
+variable "handle_iam_resources" {
+  type        = bool
+  description = "Wether to handle IAM resource lifecycle (master role / worker role / IAM instance profile for worker nodes...)"
+  default     = true
+}
+
+variable "master_role_arn" {
+  type        = string
+  description = "The ARN of a role with the necessary permissions for EKS master. (to be used with handle_iam_resources = false)"
+  default     = ""
+}
+
+variable "worker_role_arn" {
+  type        = string
+  description = "The ARN of a role with the necessary permissions for EKS workers. (to be used with handle_iam_resources = false)"
+  default     = ""
+}

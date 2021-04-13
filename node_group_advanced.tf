@@ -88,6 +88,8 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   image_id      = local.ami_id_worker
   instance_type = each.value.instance_types[0]
 
+  update_default_version = true
+
   user_data = base64encode(
     templatefile(
       "${path.module}/userdata.sh.tpl",

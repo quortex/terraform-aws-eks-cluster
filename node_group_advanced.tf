@@ -117,7 +117,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
             )
           : "${k}=${v}"]
         )
-        use_max_pods = var.node_eks_max_pods
+        use_max_pods = var.node_use_max_pods
       }
     )
   )

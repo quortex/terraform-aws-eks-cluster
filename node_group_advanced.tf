@@ -167,6 +167,8 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     ignore_changes = [
       # ignore changes to the cluster size, because it can be changed by autoscaling
       desired_capacity,
+      load_balancers,
+      target_group_arns
     ]
   }
 

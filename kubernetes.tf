@@ -86,6 +86,7 @@ resource "aws_eks_node_group" "quortex" {
       "k8s.io/cluster-autoscaler/node-template/label/nodegroup", each.key, # tag required for scaling to/from 0
     ) : {},
     { "nodegroup" = each.key },
+    lookup(each.value, "labels", {}),
     var.tags
   )
 
@@ -118,14 +119,15 @@ data "aws_region" "current" {
 # Thanks to the PropagateAtLaunch=true argument, these tags will also be propagated to instances 
 # created in this ASG.
 #
-# Note: on tag updates, the command will not be run again (the command is triggered by changes in 
-# the ASG name). The tags update can be forced by the terraform command:
-#     terraform taint module.eks.null_resource.add_custom_tags_to_asg[\"main\"]
+# Note: existing tags on the ASGs will not be removed
 resource "null_resource" "add_custom_tags_to_asg" {
   for_each = aws_eks_node_group.quortex
 
   triggers = {
     node_group = each.value["resources"][0]["autoscaling_groups"][0]["name"]
+    node_group_labels = jsonencode(lookup(var.node_groups[each.key], "labels", {}))
+    tags = jsonencode(var.tags)
+    #tags = join(",", [for k,v in var.tags: "$k=$v"])
   }
 
   provisioner "local-exec" {
@@ -135,9 +137,13 @@ aws autoscaling create-or-update-tags \
 --tags \
 ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=nodegroup,Value=${each.key},PropagateAtLaunch=true \
 ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/nodegroup,Value=${each.key},PropagateAtLaunch=true \
+%{ for k,v in lookup(var.node_groups[each.key], "labels", {}) ~}
+ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true \
+ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/${k},Value=${v},PropagateAtLaunch=true \
+%{ endfor ~}
 %{ for k,v in var.tags ~}
 ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true \
-%{ endfor }
+%{ endfor ~}
 EOF
   }
 }

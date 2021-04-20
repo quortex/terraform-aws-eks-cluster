@@ -105,6 +105,12 @@ variable "node_groups_advanced" {
   description = "[EXPERIMENTAL] Node groups that are not managed via EKS. The nodes are attached to the cluster with userdata passed to the instance boot script. More options are available than with EKS-managed node groups (taints, spot instances...). Defined as a map where the key defines the node group name, and the value is a map containing the node group parameters."
 }
 
+variable "node_use_max_pods" {
+  type        = bool
+  default     = true
+  description = "Set to false to prevent EKS from setting --max-pods in Kubelet config. By default, EKS sets the maximum number of pods that can run on the node, based on the instance type. Disabling this can be useful when using a CNI other than the default, like Calico."
+}
+
 variable "instance_profile_name" {
   type        = string
   description = "A name for the instance profile resource in AWS. Used only when node_groups_advanced is used."

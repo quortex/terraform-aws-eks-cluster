@@ -88,6 +88,8 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   image_id      = local.ami_id_worker
   instance_type = each.value.instance_types[0]
 
+  update_default_version = true
+
   user_data = base64encode(
     templatefile(
       "${path.module}/userdata.sh.tpl",
@@ -115,6 +117,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
             )
           : "${k}=${v}"]
         )
+        use_max_pods = var.node_use_max_pods
       }
     )
   )
@@ -164,6 +167,8 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     ignore_changes = [
       # ignore changes to the cluster size, because it can be changed by autoscaling
       desired_capacity,
+      load_balancers,
+      target_group_arns
     ]
   }
 

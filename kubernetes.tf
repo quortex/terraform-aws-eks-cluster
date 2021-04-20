@@ -86,6 +86,7 @@ resource "aws_eks_node_group" "quortex" {
       "k8s.io/cluster-autoscaler/node-template/label/nodegroup", each.key, # tag required for scaling to/from 0
     ) : {},
     { "nodegroup" = each.key },
+    lookup(each.value, "labels", {}),
     var.tags
   )
 
@@ -101,6 +102,50 @@ resource "aws_eks_node_group" "quortex" {
     aws_iam_role_policy_attachment.quortex-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.quortex-AmazonEC2ContainerRegistryReadOnly,
   ]
+}
+
+# This datasource is used to get the region currently used by the AWS provider
+data "aws_region" "current" {
+}
+
+# This AWS CLI command will add tags to the ASG created by EKS
+#
+# The tags specified on the resource type "aws_eks_node_group" are not propagated to the ASG that 
+# represents this node group (issue https://github.com/aws/containers-roadmap/issues/608).
+#
+# As a workaround, we add tags to the ASG after the nodegroup creation/updates using the AWS 
+# command-line.
+#
+# Thanks to the PropagateAtLaunch=true argument, these tags will also be propagated to instances 
+# created in this ASG.
+#
+# Note: existing tags on the ASGs will not be removed
+resource "null_resource" "add_custom_tags_to_asg" {
+  for_each = aws_eks_node_group.quortex
+
+  triggers = {
+    node_group = each.value["resources"][0]["autoscaling_groups"][0]["name"]
+    node_group_labels = jsonencode(lookup(var.node_groups[each.key], "labels", {}))
+    tags = jsonencode(var.tags)
+    #tags = join(",", [for k,v in var.tags: "$k=$v"])
+  }
+
+  provisioner "local-exec" {
+    command = <<EOF
+aws autoscaling create-or-update-tags \
+--region ${data.aws_region.current.name} \
+--tags \
+ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=nodegroup,Value=${each.key},PropagateAtLaunch=true \
+ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/nodegroup,Value=${each.key},PropagateAtLaunch=true \
+%{ for k,v in lookup(var.node_groups[each.key], "labels", {}) ~}
+ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true \
+ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/${k},Value=${v},PropagateAtLaunch=true \
+%{ endfor ~}
+%{ for k,v in var.tags ~}
+ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true \
+%{ endfor ~}
+EOF
+  }
 }
 
 resource "aws_security_group" "remote_access" {

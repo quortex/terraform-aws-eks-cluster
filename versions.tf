@@ -19,5 +19,6 @@ terraform {
 
   required_providers {
     aws = ">= 2.70.0"
+    null = ">= 3.1.0"
   }
 }

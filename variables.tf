@@ -38,6 +38,12 @@ variable "autoscaler_role_name" {
   default     = "quortex-autoscaler"
 }
 
+variable "ebs_csi_driver_role_name" {
+  type        = string
+  description = "A name to be used as the AWS resource name for the Amazon EBS CSI Driver role."
+  default     = "quortex-ebs-csi-driver"
+}
+
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes master version."
@@ -138,6 +144,12 @@ variable "add_cloudwatch_permissions" {
 variable "handle_iam_resources" {
   type        = bool
   description = "Wether to handle IAM resource lifecycle (master role / worker role / IAM instance profile for worker nodes...)"
+  default     = true
+}
+
+variable "handle_iam_ebs_csi_driver" {
+  type        = bool
+  description = "Wether to handle IAM resources lifecycle for Amazon EBS CSI Driver"
   default     = true
 }
 

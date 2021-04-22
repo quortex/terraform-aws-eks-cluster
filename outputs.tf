@@ -56,3 +56,8 @@ output "worker_role_arn" {
   value       = length(aws_iam_role.quortex_role_worker) > 0 ? aws_iam_role.quortex_role_worker[0].arn : null
   description = "The ARN identifier of the role created in AWS for allowing the worker nodes to make calls to the AWS APIs"
 }
+
+output "ebs_csi_driver_role_arn" {
+  value       = try(aws_iam_role.ebs_csi_driver[0].arn, null)
+  description = "The ARN identifier of the role created in AWS for the Amazon EBS CSI driver."
+}

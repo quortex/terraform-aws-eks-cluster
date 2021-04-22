@@ -14,6 +14,16 @@
  * limitations under the License.
 */
 
+locals {
+  # The Quortex cluster OIDC issuer.
+  cluster_oidc_issuer = trimprefix(aws_eks_cluster.quortex.identity[0].oidc[0].issuer, "https://")
+}
+
+# This data source is used to get the access to the effective Account ID, User ID, and ARN in which Terraform is authorized.
+data "aws_caller_identity" "current" {}
+
+# This datasource is used to get the region currently used by the AWS provider
+data "aws_region" "current" {}
 
 # Cluster
 
@@ -40,6 +50,18 @@ resource "aws_eks_cluster" "quortex" {
     aws_iam_role_policy_attachment.quortex-AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.quortex-AmazonEKSServicePolicy,
   ]
+}
+
+data "tls_certificate" "quortex_cluster" {
+  url = aws_eks_cluster.quortex.identity[0].oidc[0].issuer
+}
+
+# Provides an IAM OpenID Connect provider for the cluster.
+resource "aws_iam_openid_connect_provider" "quortex_cluster" {
+  count           = var.handle_iam_resources ? 1 : 0
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.quortex_cluster.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.quortex.identity[0].oidc[0].issuer
 }
 
 # Worker nodes
@@ -102,10 +124,6 @@ resource "aws_eks_node_group" "quortex" {
     aws_iam_role_policy_attachment.quortex-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.quortex-AmazonEC2ContainerRegistryReadOnly,
   ]
-}
-
-# This datasource is used to get the region currently used by the AWS provider
-data "aws_region" "current" {
 }
 
 # This AWS CLI command will add tags to the ASG created by EKS

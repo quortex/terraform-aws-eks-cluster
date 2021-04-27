@@ -50,19 +50,19 @@ variable "kubernetes_version" {
   default     = "1.15"
 }
 
-variable "kubernetes_cluster_version" {
+variable "kubernetes_worker_nodes_version" {
   type        = string
   description = "Kubernetes version for worker nodes. An empty string means the same Kubernetes version as the master's"
   default     = ""
 }
 
 locals {
-  kubernetes_cluster_version = var.kubernetes_cluster_version == "" ? var.kubernetes_version : var.kubernetes_cluster_version
+  kubernetes_worker_nodes_version = var.kubernetes_worker_nodes_version == "" ? var.kubernetes_version : var.kubernetes_worker_nodes_version
 }
 
 variable "kubernetes_cluster_image_id" {
   type        = string
-  description = "ID of the AMI to use for worker nodes (applies only to advanced_node_groups). If not defined, the latest AMI whose name matches \"amazon-eks-node-<kubernetes_cluster_version>-v*\" will be used"
+  description = "ID of the AMI to use for worker nodes (applies only to advanced_node_groups). If not defined, the latest AMI whose name matches \"amazon-eks-node-<kubernetes_worker_nodes_version>-v*\" will be used"
   default     = null
 }
 

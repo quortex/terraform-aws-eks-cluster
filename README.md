@@ -97,9 +97,9 @@ Note: all items of `node_groups` or `node_groups_advanced` must have the same ke
 
 ## Cluster node image
 
-By default, when using node-groups-advanced, the image for the worker nodes instances is the latest AMI found whose name matches \"amazon-eks-node-`<kubernetes_cluster_version>`-v*\". The image ID can be overriden using `kubernetes_cluster_image_id`.
+By default, when using node-groups-advanced, the image for the worker nodes instances is the latest AMI found whose name matches \"amazon-eks-node-`<kubernetes_worker_nodes_version>`-v*\". The image ID can be overriden using `kubernetes_cluster_image_id`.
 
-When using EKS-managed nodes, the image version is selected by EKS based on `kubernetes_cluster_version`.
+When using EKS-managed nodes, the image version is selected by EKS based on `kubernetes_worker_nodes_version`.
 
 ---
 

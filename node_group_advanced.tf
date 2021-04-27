@@ -68,7 +68,7 @@ resource "aws_iam_instance_profile" "quortex" {
 data "aws_ami" "eks_worker_image" {
   filter {
     name   = "name"
-    values = ["amazon-eks-node-${local.kubernetes_cluster_version}-v*"]
+    values = ["amazon-eks-node-${local.kubernetes_worker_nodes_version}-v*"]
   }
   most_recent = true
   owners      = ["self", "amazon"]

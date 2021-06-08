@@ -152,14 +152,14 @@ resource "null_resource" "add_custom_tags_to_asg" {
 aws autoscaling create-or-update-tags \
 --region ${data.aws_region.current.name} \
 --tags \
-ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=nodegroup,Value=${each.key},PropagateAtLaunch=true \
-ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/nodegroup,Value=${each.key},PropagateAtLaunch=true \
+"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=nodegroup,Value=${each.key},PropagateAtLaunch=true" \
+"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/nodegroup,Value=${each.key},PropagateAtLaunch=true" \
 %{for k, v in lookup(var.node_groups[each.key], "labels", {})~}
-ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true \
-ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/${k},Value=${v},PropagateAtLaunch=true \
+"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true" \
+"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/${k},Value=${v},PropagateAtLaunch=true" \
 %{endfor~}
 %{for k, v in var.tags~}
-ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true \
+"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true" \
 %{endfor~}
 EOF
   }

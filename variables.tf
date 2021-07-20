@@ -38,6 +38,19 @@ variable "autoscaler_role_name" {
   default     = "quortex-autoscaler"
 }
 
+variable "autoscaler_sa" {
+  description = "Service Account name for Autoscaler"
+
+  type = object({
+    namespace = string
+    name      = string
+  })
+  default = {
+    namespace = "kube-system"
+    name      = "cluster-autoscaler-sa"
+  }
+}
+
 variable "ebs_csi_driver_role_name" {
   type        = string
   description = "A name to be used as the AWS resource name for the Amazon EBS CSI Driver role."

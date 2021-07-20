@@ -59,40 +59,6 @@ resource "aws_iam_role_policy_attachment" "quortex-AmazonEC2ContainerRegistryRea
   role       = aws_iam_role.quortex_role_worker[0].name
 }
 
-### Attach a new policy for the cluster-autoscaler to the worker role
-
-resource "aws_iam_policy" "quortex-autoscaler-policy" {
-  count       = var.handle_iam_resources ? 1 : 0
-  description = "Allow the cluster autoscaler to make calls to the AWS APIs."
-
-  policy = <<POLICY
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "autoscaling:DescribeAutoScalingGroups",
-                "autoscaling:DescribeAutoScalingInstances",
-                "autoscaling:DescribeLaunchConfigurations",
-                "autoscaling:DescribeTags",
-                "autoscaling:SetDesiredCapacity",
-                "autoscaling:TerminateInstanceInAutoScalingGroup",
-                "ec2:DescribeLaunchTemplateVersions"
-            ],
-            "Resource": "*",
-            "Effect": "Allow"
-        }
-    ]
-}
-POLICY
-}
-
-resource "aws_iam_role_policy_attachment" "quortex-autoscaler-policy-attach" {
-  count      = var.handle_iam_resources ? 1 : 0
-  role       = aws_iam_role.quortex_role_worker[0].name
-  policy_arn = aws_iam_policy.quortex-autoscaler-policy[0].arn
-}
-
 ### Attach a new policy for the cloudwatch-exporter to the worker role
 
 resource "aws_iam_policy" "quortex-cloudwatch-policy" {
@@ -111,7 +77,7 @@ resource "aws_iam_policy" "quortex-cloudwatch-policy" {
                 "cloudwatch:GetMetricData",
                 "tag:GetResources"
             ],
-            "Resource": "*", 
+            "Resource": "*",
             "Effect": "Allow"
         }
     ]

@@ -61,3 +61,8 @@ output "ebs_csi_driver_role_arn" {
   value       = try(aws_iam_role.ebs_csi_driver[0].arn, null)
   description = "The ARN identifier of the role created in AWS for the Amazon EBS CSI driver."
 }
+
+output "cluster_autoscaler_role_arn" {
+  value       = try(aws_iam_role.quortex_role_autoscaler[0].arn, null)
+  description = "The ARN identifier of the role created in AWS for the Cluster Autoscaler."
+}

@@ -17,7 +17,7 @@ resource "aws_iam_role" "quortex_role_autoscaler" {
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
         "StringEquals": {
-          "${local.cluster_oidc_issuer}:sub": "system:serviceaccount:kube-system:${var.autoscaler_sa_name}"
+          "${local.cluster_oidc_issuer}:sub": "system:serviceaccount:${var.autoscaler_sa.namespace}:${var.autoscaler_sa.name}"
         }
       }
     }

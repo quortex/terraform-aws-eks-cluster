@@ -1,7 +1,7 @@
 
 resource "aws_iam_role" "quortex_role_autoscaler" {
   count       = var.handle_iam_resources ? 1 : 0
-  name        = var.worker_role_name
+  name        = var.autoscaler_role_name
   description = "IAM Role to allow the autoscaler service account to manage AWS Autoscaling."
   tags        = var.tags
 

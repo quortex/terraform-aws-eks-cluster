@@ -90,18 +90,6 @@ variable "master_subnet_ids" {
   default     = []
 }
 
-variable "worker_public_subnet_ids" {
-  type        = list(string)
-  description = "The IDs of the subnets where public worker nodes should be placed"
-  default     = []
-}
-
-variable "worker_private_subnet_ids" {
-  type        = list(string)
-  description = "The IDs of the subnets where private worker nodes should be placed"
-  default     = []
-}
-
 variable "master_authorized_networks" {
   type        = map(string)
   description = "External networks that can access the Kubernetes cluster master through HTTPS. This is a dictionary where the value is the CIDR block of the authorized range."

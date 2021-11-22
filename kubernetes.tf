@@ -73,7 +73,7 @@ resource "aws_eks_node_group" "quortex" {
   version         = var.kubernetes_worker_nodes_version
   node_group_name = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
   node_role_arn   = var.handle_iam_resources ? aws_iam_role.quortex_role_worker[0].arn : var.worker_role_arn
-  subnet_ids      = lookup(each.value, "public", false) ? var.worker_public_subnet_ids : var.worker_private_subnet_ids
+  subnet_ids      = lookup(each.value, "subnet_ids", [])
 
   scaling_config {
     desired_size = lookup(each.value, "scaling_desired_size", lookup(each.value, "scaling_min_size", 1))

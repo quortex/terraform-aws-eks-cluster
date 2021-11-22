@@ -107,11 +107,11 @@ resource "aws_launch_template" "quortex_launch_tpl" {
             for k, v in
             merge(
               # Built-in labels
-              map(
-                "eks.amazonaws.com/nodegroup-image", local.ami_id_worker,
-                "eks.amazonaws.com/nodegroup", each.key,
-                "nodegroup", each.key
-              ),
+              {
+                "eks.amazonaws.com/nodegroup-image" = local.ami_id_worker,
+                "eks.amazonaws.com/nodegroup"       = each.key,
+                "nodegroup"                         = each.key
+              },
               # User-specified labels
               lookup(each.value, "labels", {}),
             )
@@ -144,9 +144,9 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   key_name = var.remote_access_ssh_key
 
   tags = merge(
-    map(
-      "nodegroup", lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
-    ),
+    {
+      "nodegroup" = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
+    },
     var.tags
   )
 

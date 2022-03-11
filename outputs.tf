@@ -52,6 +52,11 @@ output "cluster_endpoint" {
   description = "The endpoint for the Kubernetes API server."
 }
 
+output "cluster_oidc_issuer_url" {
+  value       = try(aws_eks_cluster.quortex.identity[0].oidc[0].issuer, null)
+  description = "URL of Kubernetes OpenID Connect Issuer."
+}
+
 output "worker_role_arn" {
   value       = length(aws_iam_role.quortex_role_worker) > 0 ? aws_iam_role.quortex_role_worker[0].arn : null
   description = "The ARN identifier of the role created in AWS for allowing the worker nodes to make calls to the AWS APIs"

@@ -94,10 +94,10 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     templatefile(
       "${path.module}/userdata.sh.tpl",
       {
-        cluster_name            = aws_eks_cluster.quortex.name
-        base64_cluster_ca       = aws_eks_cluster.quortex.certificate_authority[0].data
-        api_server_url          = aws_eks_cluster.quortex.endpoint
-        kubelet_more_extra_args = ""
+        cluster_name       = aws_eks_cluster.quortex.name
+        base64_cluster_ca  = aws_eks_cluster.quortex.certificate_authority[0].data
+        api_server_url     = aws_eks_cluster.quortex.endpoint
+        kubelet_extra_args = lookup(each.value, "kubelet_extra_args", "")
         // define the k8s node taints (passed to --kubelet-extra-args)
         node_taints = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
         // define the k8s node labels (passed to --kubelet-extra-args)

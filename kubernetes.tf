@@ -66,6 +66,13 @@ resource "aws_iam_openid_connect_provider" "quortex_cluster" {
 
 # Worker nodes
 
+resource "aws_launch_template" "quortex" {
+  name = aws_eks_cluster.quortex.name
+  metadata_options {
+    http_tokens = "required"
+  }
+}
+
 resource "aws_eks_node_group" "quortex" {
   for_each = var.node_groups
 
@@ -100,6 +107,11 @@ resource "aws_eks_node_group" "quortex" {
     }
   }
 
+  launch_template {
+    id      = aws_launch_template.quortex.id
+    version = "$Latest"
+  }
+
   tags = merge(
     lookup(each.value, "cluster_autoscaler_enabled", true) ? {
       # tag the node group so that it can be auto-discovered by the cluster autoscaler
@@ -128,13 +140,13 @@ resource "aws_eks_node_group" "quortex" {
 
 # This AWS CLI command will add tags to the ASG created by EKS
 #
-# The tags specified on the resource type "aws_eks_node_group" are not propagated to the ASG that 
+# The tags specified on the resource type "aws_eks_node_group" are not propagated to the ASG that
 # represents this node group (issue https://github.com/aws/containers-roadmap/issues/608).
 #
-# As a workaround, we add tags to the ASG after the nodegroup creation/updates using the AWS 
+# As a workaround, we add tags to the ASG after the nodegroup creation/updates using the AWS
 # command-line.
 #
-# Thanks to the PropagateAtLaunch=true argument, these tags will also be propagated to instances 
+# Thanks to the PropagateAtLaunch=true argument, these tags will also be propagated to instances
 # created in this ASG.
 #
 # Note: existing tags on the ASGs will not be removed

@@ -143,6 +143,10 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 
   key_name = var.remote_access_ssh_key
 
+  metadata_options {
+    http_tokens = "required"
+  }
+
   tags = merge(
     {
       "nodegroup" = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")

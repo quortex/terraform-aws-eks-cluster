@@ -172,7 +172,7 @@ variable "force_imdsv2_on_managed_nodegroups" {
   description = "Whether IMDSv1 should be disabled on 'var.node_groups'"
 }
 
-variable "force_imdsv2_on_not_managed_nodegroups" {
+variable "force_imdsv2_on_unmanaged_nodegroups" {
   type        = bool
   default     = true
   description = "Whether IMDSv1 should be disabled on 'var.node_groups_advanced'"

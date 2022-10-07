@@ -165,3 +165,15 @@ variable "worker_role_arn" {
   description = "The ARN of a role with the necessary permissions for EKS workers. (to be used with handle_iam_resources = false)"
   default     = ""
 }
+
+variable "force_imdsv2_on_managed_nodegroups" {
+  type        = bool
+  default     = true
+  description = "Whether IMDSv1 should be disabled on 'var.node_groups'"
+}
+
+variable "force_imdsv2_on_not_managed_nodegroups" {
+  type        = bool
+  default     = true
+  description = "Whether IMDSv1 should be disabled on 'var.node_groups_advanced'"
+}

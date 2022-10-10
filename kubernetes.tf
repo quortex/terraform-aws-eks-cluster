@@ -66,16 +66,6 @@ resource "aws_iam_openid_connect_provider" "quortex_cluster" {
 
 # Worker nodes
 
-resource "aws_launch_template" "quortex" {
-  name = aws_eks_cluster.quortex.name
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_tokens                 = "required"
-    http_put_response_hop_limit = 1
-    instance_metadata_tags      = "disabled"
-  }
-}
-
 resource "aws_eks_node_group" "quortex" {
   for_each = var.node_groups
 
@@ -107,15 +97,6 @@ resource "aws_eks_node_group" "quortex" {
     content {
       ec2_ssh_key               = var.remote_access_ssh_key
       source_security_group_ids = aws_security_group.remote_access[*].id
-    }
-  }
-
-  dynamic "launch_template" {
-    for_each = lookup(each.value, "force_imdsv2", true) ? [true] : []
-
-    content {
-      id      = aws_launch_template.quortex.id
-      version = "$Latest"
     }
   }
 

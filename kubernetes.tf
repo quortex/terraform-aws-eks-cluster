@@ -64,12 +64,9 @@ resource "aws_iam_openid_connect_provider" "quortex_cluster" {
   url             = aws_eks_cluster.quortex.identity[0].oidc[0].issuer
 }
 
-
 # Worker nodes
 
 resource "aws_launch_template" "quortex" {
-  count = var.force_imdsv2_on_managed_nodegroups ? 1 : 0
-
   name = aws_eks_cluster.quortex.name
   metadata_options {
     http_endpoint               = "enabled"
@@ -114,7 +111,8 @@ resource "aws_eks_node_group" "quortex" {
   }
 
   dynamic "launch_template" {
-    for_each = var.force_imdsv2_on_managed_nodegroups ? [1] : []
+    for_each = lookup(each.value, "force_imdsv2", true) ? [true] : []
+
     content {
       id      = aws_launch_template.quortex.id
       version = "$Latest"

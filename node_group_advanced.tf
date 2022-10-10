@@ -144,7 +144,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
   key_name = var.remote_access_ssh_key
 
   dynamic "metadata_options" {
-    for_each = var.force_imdsv2_on_unmanaged_nodegroups ? [1] : []
+    for_each = lookup(each.value, "force_imdsv2", true) ? [true] : []
 
     content {
       http_endpoint               = "enabled"

@@ -69,7 +69,10 @@ resource "aws_iam_openid_connect_provider" "quortex_cluster" {
 resource "aws_launch_template" "quortex" {
   name = aws_eks_cluster.quortex.name
   metadata_options {
-    http_tokens = "required"
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "disabled"
   }
 }
 
@@ -107,9 +110,13 @@ resource "aws_eks_node_group" "quortex" {
     }
   }
 
-  launch_template {
-    id      = aws_launch_template.quortex.id
-    version = "$Latest"
+  dynamic "launch_template" {
+    for_each = lookup(each.value, "force_imdsv2", true) ? [true] : []
+
+    content {
+      id      = aws_launch_template.quortex.id
+      version = "$Latest"
+    }
   }
 
   tags = merge(

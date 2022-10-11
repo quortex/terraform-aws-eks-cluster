@@ -143,15 +143,11 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 
   key_name = var.remote_access_ssh_key
 
-  dynamic "metadata_options" {
-    for_each = lookup(each.value, "force_imdsv2", true) ? [true] : []
-
-    content {
-      http_endpoint               = "enabled"
-      http_tokens                 = "required"
-      http_put_response_hop_limit = 1
-      instance_metadata_tags      = "disabled"
-    }
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = lookup(each.value, "imdsv2_required", true) ? "required" : "optional"
+    http_put_response_hop_limit = 2
+    instance_metadata_tags      = "disabled"
   }
 
   tags = merge(

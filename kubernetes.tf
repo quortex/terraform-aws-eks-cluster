@@ -145,6 +145,7 @@ resource "null_resource" "add_custom_tags_to_asg" {
     node_group        = each.value["resources"][0]["autoscaling_groups"][0]["name"]
     node_group_labels = jsonencode(lookup(var.node_groups[each.key], "labels", {}))
     tags              = jsonencode(var.tags)
+    minimize_tags     = jsonencode(var.minimize_tags)
   }
 
   provisioner "local-exec" {
@@ -161,6 +162,10 @@ aws autoscaling create-or-update-tags \
 %{for k, v in var.tags~}
 "ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true" \
 %{endfor~}
+%{for k, v in var.minimize_tags~}
+"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=\"${v}\",PropagateAtLaunch=true" \
+%{endfor~}
+
 EOF
   }
 }

@@ -102,9 +102,9 @@ variable "tags" {
   default     = {}
 }
 
-variable "minimize_tags" {
+variable "compute_tags" {
   type        = map(any)
-  description = "The EKS resource tags (a map of key/value pairs) to be applied to the cluster 'minimizable' resources."
+  description = "The EKS resource tags (a map of key/value pairs) to be applied to the cluster's compute resources only."
   default     = {}
 }
 

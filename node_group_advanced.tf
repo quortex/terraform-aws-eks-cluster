@@ -94,8 +94,8 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     templatefile(
       "${path.module}/userdata.sh.tpl",
       {
-        warm_pool     = each.value.warm_pool_enabled 
-        script        = templatefile("${path.module}/cluster_connect.sh.tpl", 
+        warm_pool = lookup(each.value, "warm_pool_enabled", false)
+        script = templatefile("${path.module}/cluster_connect.sh.tpl",
           {
             cluster_name       = aws_eks_cluster.quortex.name
             base64_cluster_ca  = aws_eks_cluster.quortex.certificate_authority[0].data
@@ -124,7 +124,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
           }
         )
       }
-        
+
     )
   )
 
@@ -197,10 +197,10 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
 
   # Only for Warm-Pool instance groups:
   dynamic "warm_pool" {
-    for_each = each.value.warm_pool_enabled ? [true] : []
+    for_each = lookup(each.value, "warm_pool_enabled", false) ? [true]:[]
     content {
-      pool_state = "Stopped"
-      min_size = lookup(each.value, "warm_pool_min_size", 0)
+      pool_state                  = "Stopped"
+      min_size                    = lookup(each.value, "warm_pool_min_size", 0)
       max_group_prepared_capacity = lookup(each.value, "warm_pool_max_prepared_capacity", 0)
     }
   }

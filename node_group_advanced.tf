@@ -29,8 +29,8 @@ locals {
 
   # # node_groups_advanced with filtered instance_types
   filtered_node_groups_advanced = { for k, v in var.node_groups_advanced : k =>
-    lookup(v, "instance_filter", local.filter_all) == local.filter_preferred ? merge(v, tomap({"instance_types" =  [data.aws_ec2_instance_type_offering.preferred[k].instance_type]})) :
-    lookup(v, "instance_filter", local.filter_all) == local.filter_available ? merge(v, tomap({"instance_types" =  data.aws_ec2_instance_type_offerings.available[k].instance_types})) :
+    lookup(v, "instance_filter", local.filter_all) == local.filter_preferred ? merge(v, tomap({ "instance_types" = [data.aws_ec2_instance_type_offering.preferred[k].instance_type] })) :
+    lookup(v, "instance_filter", local.filter_all) == local.filter_available ? merge(v, tomap({ "instance_types" = data.aws_ec2_instance_type_offerings.available[k].instance_types })) :
     v
   }
 }
@@ -197,7 +197,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
 
   # Only for Warm-Pool instance groups:
   dynamic "warm_pool" {
-    for_each = lookup(each.value, "warm_pool_enabled", false) ? [true]:[]
+    for_each = lookup(each.value, "warm_pool_enabled", false) ? [true] : []
     content {
       pool_state                  = "Stopped"
       min_size                    = lookup(each.value, "warm_pool_min_size", 0)

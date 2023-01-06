@@ -29,8 +29,8 @@ locals {
 
   # # node_groups_advanced with filtered instance_types
   filtered_node_groups_advanced = { for k, v in var.node_groups_advanced : k =>
-    lookup(v, "instance_filter", local.filter_all) == local.filter_preferred ? merge(v, tomap({"instance_types" =  [data.aws_ec2_instance_type_offering.preferred[k].instance_type]})) :
-    lookup(v, "instance_filter", local.filter_all) == local.filter_available ? merge(v, tomap({"instance_types" =  data.aws_ec2_instance_type_offerings.available[k].instance_types})) :
+    lookup(v, "instance_filter", local.filter_all) == local.filter_preferred ? merge(v, tomap({ "instance_types" = [data.aws_ec2_instance_type_offering.preferred[k].instance_type] })) :
+    lookup(v, "instance_filter", local.filter_all) == local.filter_available ? merge(v, tomap({ "instance_types" = data.aws_ec2_instance_type_offerings.available[k].instance_types })) :
     v
   }
 }
@@ -94,31 +94,37 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     templatefile(
       "${path.module}/userdata.sh.tpl",
       {
-        cluster_name       = aws_eks_cluster.quortex.name
-        base64_cluster_ca  = aws_eks_cluster.quortex.certificate_authority[0].data
-        api_server_url     = aws_eks_cluster.quortex.endpoint
-        kubelet_extra_args = lookup(each.value, "kubelet_extra_args", "")
-        // define the k8s node taints (passed to --kubelet-extra-args)
-        node_taints = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
-        // define the k8s node labels (passed to --kubelet-extra-args)
-        node_labels = join(
-          ",",
-          [
-            for k, v in
-            merge(
-              # Built-in labels
-              {
-                "eks.amazonaws.com/nodegroup-image" = local.ami_id_worker,
-                "eks.amazonaws.com/nodegroup"       = each.key,
-                "nodegroup"                         = each.key
-              },
-              # User-specified labels
-              lookup(each.value, "labels", {}),
+        warm_pool = lookup(each.value, "warm_pool_enabled", false)
+        script = templatefile("${path.module}/cluster_connect.sh.tpl",
+          {
+            cluster_name       = aws_eks_cluster.quortex.name
+            base64_cluster_ca  = aws_eks_cluster.quortex.certificate_authority[0].data
+            api_server_url     = aws_eks_cluster.quortex.endpoint
+            kubelet_extra_args = lookup(each.value, "kubelet_extra_args", "")
+            // define the k8s node taints (passed to --kubelet-extra-args)
+            node_taints = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
+            // define the k8s node labels (passed to --kubelet-extra-args)
+            node_labels = join(
+              ",",
+              [
+                for k, v in
+                merge(
+                  # Built-in labels
+                  {
+                    "eks.amazonaws.com/nodegroup-image" = local.ami_id_worker,
+                    "eks.amazonaws.com/nodegroup"       = each.key,
+                    "nodegroup"                         = each.key
+                  },
+                  # User-specified labels
+                  lookup(each.value, "labels", {}),
+                )
+              : "${k}=${v}"]
             )
-          : "${k}=${v}"]
+            use_max_pods = var.node_use_max_pods
+          }
         )
-        use_max_pods = var.node_use_max_pods
       }
+
     )
   )
 
@@ -186,6 +192,16 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     content {
       id      = aws_launch_template.quortex_launch_tpl[each.key].id
       version = "$Latest"
+    }
+  }
+
+  # Only for Warm-Pool instance groups:
+  dynamic "warm_pool" {
+    for_each = lookup(each.value, "warm_pool_enabled", false) ? [true] : []
+    content {
+      pool_state                  = "Stopped"
+      min_size                    = lookup(each.value, "warm_pool_min_size", 0)
+      max_group_prepared_capacity = lookup(each.value, "warm_pool_max_prepared_capacity", 0)
     }
   }
 

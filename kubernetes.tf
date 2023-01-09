@@ -44,11 +44,14 @@ resource "aws_eks_cluster" "quortex" {
     # Note: for private endpoint to work, DNS hostnames must be enabled in the VPC
   }
 
+  enabled_cluster_log_types = var.enabled_cluster_log_types
+
   tags = var.tags
 
   depends_on = [
     aws_iam_role_policy_attachment.quortex-AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.quortex-AmazonEKSServicePolicy,
+    aws_cloudwatch_log_group.cluster_logs
   ]
 }
 
@@ -192,4 +195,12 @@ resource "aws_security_group" "remote_access" {
     },
     var.tags
   )
+}
+
+resource "aws_cloudwatch_log_group" "cluster_logs" {
+  # The log group name format is /aws/eks/<cluster-name>/cluster
+  # Reference: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+  name              = "/aws/eks/${var.cluster_name}/cluster"
+  retention_in_days = var.cluster_logs_retention
+  tags              = var.tags
 }

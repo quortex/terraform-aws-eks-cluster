@@ -171,3 +171,15 @@ variable "worker_role_arn" {
   description = "The ARN of a role with the necessary permissions for EKS workers. (to be used with handle_iam_resources = false)"
   default     = ""
 }
+
+variable "enabled_cluster_log_types" {
+  type        = list(string)
+  description = "List of the desired control plane logging to enable. For more information, see Amazon EKS Control Plane Logging (https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html)."
+  default     = []
+}
+
+variable "cluster_logs_retention" {
+  type        = number
+  description = "Specifies the number of days you want to retain log events for the cluster logs log group."
+  default     = 7
+}

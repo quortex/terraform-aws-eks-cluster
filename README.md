@@ -32,8 +32,20 @@ module "quortex-eks" {
   source = "quortex/eks-cluster/aws"
   
   name               = "quortexcluster"
-  kubernetes_version = "1.15"
+  kubernetes_version = "1.22"
   availability_zones = ["eu-west-3b", "eu-west-3c"]
+
+  cluster_addons = {
+    coredns = {
+      version = "v1.8.7-eksbuild.3"
+    }
+    kube-proxy = {
+      version = "v1.22.6-eksbuild.1"
+    }
+    vpc-cni = {
+      version = "v1.10.1-eksbuild.1"
+    }
+  }
 
   # values from the Quortex network module:
   master_subnet_ids         = module.network.private_subnet_ids

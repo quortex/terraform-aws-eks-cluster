@@ -60,7 +60,7 @@ variable "ebs_csi_driver_role_name" {
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes master version."
-  default     = "1.15"
+  default     = "1.22"
 }
 
 variable "kubernetes_worker_nodes_version" {
@@ -182,4 +182,10 @@ variable "cluster_logs_retention" {
   type        = number
   description = "Specifies the number of days you want to retain log events for the cluster logs log group."
   default     = 7
+}
+
+variable "cluster_addons" {
+  description = "Map of cluster addon configurations to enable for the cluster.`"
+  type = any
+  default = {}
 }

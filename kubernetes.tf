@@ -26,7 +26,6 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 # Cluster
-
 resource "aws_eks_cluster" "quortex" {
   name     = var.cluster_name
   role_arn = var.handle_iam_resources ? aws_iam_role.quortex_role_master[0].arn : var.master_role_arn
@@ -68,7 +67,6 @@ resource "aws_iam_openid_connect_provider" "quortex_cluster" {
 }
 
 # Worker nodes
-
 resource "aws_eks_node_group" "quortex" {
   for_each = var.node_groups
 
@@ -127,6 +125,20 @@ resource "aws_eks_node_group" "quortex" {
     aws_iam_role_policy_attachment.quortex-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.quortex-AmazonEC2ContainerRegistryReadOnly,
   ]
+}
+
+# Eks addons
+resource "aws_eks_addon" "quortex_addon" {
+  for_each = { for k, v in var.cluster_addons : k => v }
+
+  cluster_name         = aws_eks_cluster.quortex.name
+  addon_name           = each.key
+  addon_version        = each.value.version
+  configuration_values = try(each.value.configuration_values, null)
+  preserve             = try(each.value.preserve, null)
+  resolve_conflicts    = try(each.value.resolve_conflicts, "OVERWRITE")
+
+  tags = var.tags
 }
 
 # This AWS CLI command will add tags to the ASG created by EKS

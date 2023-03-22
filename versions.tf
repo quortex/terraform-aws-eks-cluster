@@ -18,6 +18,7 @@ terraform {
   required_version = ">= 0.12"
 
   required_providers {
+    tls  = ">= 3.0.0"
     aws  = ">= 4.47.0"
     null = ">= 3.1.0"
   }

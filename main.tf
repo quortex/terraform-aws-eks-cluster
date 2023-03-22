@@ -48,8 +48,8 @@ resource "aws_eks_cluster" "quortex" {
   tags = var.tags
 
   depends_on = [
-    aws_iam_role_policy_attachment.quortex-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.quortex-AmazonEKSServicePolicy,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_cluster_policy,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_service_policy,
     aws_cloudwatch_log_group.cluster_logs
   ]
 }
@@ -85,7 +85,7 @@ resource "aws_eks_node_group" "quortex" {
   lifecycle {
     ignore_changes = [
       # ignore changes to the cluster size, because it can be changed by autoscaling
-      scaling_config.0.desired_size,
+      scaling_config[0].desired_size,
     ]
   }
 
@@ -121,9 +121,9 @@ resource "aws_eks_node_group" "quortex" {
   )
 
   depends_on = [
-    aws_iam_role_policy_attachment.quortex-AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.quortex-AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.quortex-AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_worker_node_policy,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_cni_policy,
+    aws_iam_role_policy_attachment.quortex_amazon_ec2_container_registry_read_only,
   ]
 }
 

@@ -30,7 +30,7 @@ Example that creates 1 EKS-managed node group and 2 advanced node group (one On-
 ```hcl
 module "quortex-eks" {
   source = "quortex/eks-cluster/aws"
-  
+
   name               = "quortexcluster"
   kubernetes_version = "1.22"
   availability_zones = ["eu-west-3b", "eu-west-3c"]
@@ -52,7 +52,7 @@ module "quortex-eks" {
   worker_public_subnet_ids  = module.network.public_subnet_ids
   worker_private_subnet_ids = module.network.private_subnet_ids
   vpc_id                    = module.network.vpc_id
-  
+
   master_authorized_networks = {
     myipaddress = "98.235.24.130/32"
   }
@@ -82,7 +82,7 @@ module "quortex-eks" {
       cluster_autoscaler_enabled = true
       enabled_metrics            = []
       taints                     = {}
-      labels                     = {} 
+      labels                     = {}
     }
     # Example of Spot node group:
     workflow-group-spot = {
@@ -99,7 +99,7 @@ module "quortex-eks" {
       cluster_autoscaler_enabled = true
       enabled_metrics            = []
       taints                     = {} # example taints:  {"spotinstance":"true:PreferNoSchedule"}
-      labels                     = {} 
+      labels                     = {}
     }
   }
 }

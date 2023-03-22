@@ -186,6 +186,6 @@ variable "cluster_logs_retention" {
 
 variable "cluster_addons" {
   description = "Map of cluster addon configurations to enable for the cluster.`"
-  type = any
-  default = {}
+  type        = any
+  default     = {}
 }

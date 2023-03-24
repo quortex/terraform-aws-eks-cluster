@@ -287,7 +287,11 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
 
   # user defined tags
   dynamic "tag" {
-    for_each = merge(var.tags, var.compute_tags)
+    for_each = merge(
+      var.tags,
+      var.compute_tags,
+      lookup(each.value, "tags", {})
+    )
     iterator = tag
 
     content {

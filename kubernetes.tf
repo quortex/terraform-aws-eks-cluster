@@ -110,6 +110,7 @@ resource "aws_eks_node_group" "quortex" {
     } : {},
     { "nodegroup" = each.key },
     lookup(each.value, "labels", {}),
+    lookup(each.value, "tags", {}),
     var.tags
   )
 

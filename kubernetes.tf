@@ -17,6 +17,41 @@
 locals {
   # The Quortex cluster OIDC issuer.
   cluster_oidc_issuer = trimprefix(aws_eks_cluster.quortex.identity[0].oidc[0].issuer, "https://")
+  node_group_labels = [
+    for key, node_group in var.node_groups :
+    {
+      for k, v in lookup(node_group, "labels", {}) :
+      key => {
+        "k8s.io/cluster-autoscaler/node-template/label/${k}" : v
+        "${k}" : v
+      }...
+    }
+  ]
+  node_groups_tags = {
+    for key, node_group in var.node_groups :
+    key => {
+      for k, v in lookup(node_group, "tags", {}) :
+      "${k}" => v
+    }
+  }
+  asg_custom_tags_chunks = chunklist(flatten([
+    for key, node_group in var.node_groups : [
+      for k, v in merge({
+        nodegroup : key,
+        "k8s.io/cluster-autoscaler/node-template/label/nodegroup" : key
+        },
+        merge(local.node_group_labels[0][key]...),
+        merge(local.node_groups_tags[key]),
+        var.tags,
+        var.compute_tags
+      ) :
+      {
+        node_group : key,
+        key : k,
+        tag : v
+      }
+    ]
+  ]), 5)
 }
 
 # This data source is used to get the access to the effective Account ID, User ID, and ARN in which Terraform is authorized.
@@ -155,13 +190,10 @@ resource "aws_eks_addon" "quortex_addon" {
 #
 # Note: existing tags on the ASGs will not be removed
 resource "null_resource" "add_custom_tags_to_asg" {
-  for_each = aws_eks_node_group.quortex
+  count = length(local.asg_custom_tags_chunks)
 
   triggers = {
-    node_group        = each.value["resources"][0]["autoscaling_groups"][0]["name"]
-    node_group_labels = jsonencode(lookup(var.node_groups[each.key], "labels", {}))
-    tags              = jsonencode(var.tags)
-    compute_tags      = jsonencode(var.compute_tags)
+    asg_custom_tags_chunk = jsonencode(local.asg_custom_tags_chunks[count.index])
   }
 
   provisioner "local-exec" {
@@ -169,17 +201,8 @@ resource "null_resource" "add_custom_tags_to_asg" {
 aws autoscaling create-or-update-tags \
 --region ${data.aws_region.current.name} \
 --tags \
-"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=nodegroup,Value=${each.key},PropagateAtLaunch=true" \
-"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/nodegroup,Value=${each.key},PropagateAtLaunch=true" \
-%{for k, v in lookup(var.node_groups[each.key], "labels", {})~}
-"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true" \
-"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=k8s.io/cluster-autoscaler/node-template/label/${k},Value=${v},PropagateAtLaunch=true" \
-%{endfor~}
-%{for k, v in var.tags~}
-"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=${v},PropagateAtLaunch=true" \
-%{endfor~}
-%{for k, v in var.compute_tags~}
-"ResourceId=${each.value["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key=${k},Value=\"${v}\",PropagateAtLaunch=true" \
+%{for v in local.asg_custom_tags_chunks[count.index]~}
+"ResourceId=${aws_eks_node_group.quortex[v.node_group]["resources"][0]["autoscaling_groups"][0]["name"]},ResourceType=auto-scaling-group,Key='${v.key}',Value='${v.tag}',PropagateAtLaunch=true" \
 %{endfor~}
 
 EOF

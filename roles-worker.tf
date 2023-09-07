@@ -41,19 +41,19 @@ POLICY
 
 # IAM role policies
 
-resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSWorkerNodePolicy" {
+resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_worker_node_policy" {
   count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.quortex_role_worker[0].name
 }
 
-resource "aws_iam_role_policy_attachment" "quortex-AmazonEKS_CNI_Policy" {
+resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_cni_policy" {
   count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.quortex_role_worker[0].name
 }
 
-resource "aws_iam_role_policy_attachment" "quortex-AmazonEC2ContainerRegistryReadOnly" {
+resource "aws_iam_role_policy_attachment" "quortex_amazon_ec2_container_registry_readonly" {
   count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.quortex_role_worker[0].name
@@ -61,7 +61,7 @@ resource "aws_iam_role_policy_attachment" "quortex-AmazonEC2ContainerRegistryRea
 
 ### Attach a new policy for the cloudwatch-exporter to the worker role
 
-resource "aws_iam_policy" "quortex-cloudwatch-policy" {
+resource "aws_iam_policy" "quortex_cloudwatch_policy" {
   count = var.handle_iam_resources && var.add_cloudwatch_permissions ? 1 : 0
 
   description = "Allow the cloudwatch-exporter to make calls to the AWS CloudWatch APIs."
@@ -85,9 +85,9 @@ resource "aws_iam_policy" "quortex-cloudwatch-policy" {
 POLICY
 }
 
-resource "aws_iam_role_policy_attachment" "quortex-cloudwatch-policy-attach" {
+resource "aws_iam_role_policy_attachment" "quortex_cloudwatch_policy_attach" {
   count = var.handle_iam_resources && var.add_cloudwatch_permissions ? 1 : 0
 
   role       = aws_iam_role.quortex_role_worker[0].name
-  policy_arn = aws_iam_policy.quortex-cloudwatch-policy[0].arn
+  policy_arn = aws_iam_policy.quortex_cloudwatch_policy[0].arn
 }

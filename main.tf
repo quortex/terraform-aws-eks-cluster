@@ -23,7 +23,7 @@ locals {
       for k, v in lookup(node_group, "labels", {}) :
       key => {
         "k8s.io/cluster-autoscaler/node-template/label/${k}" : v
-        "${k}" : v
+        (k) : v
       }...
     }
   ]
@@ -31,7 +31,7 @@ locals {
     for key, node_group in var.node_groups :
     key => {
       for k, v in lookup(node_group, "tags", {}) :
-      "${k}" => v
+      k => v
     }
   }
   asg_custom_tags_chunks = chunklist(flatten([
@@ -83,8 +83,8 @@ resource "aws_eks_cluster" "quortex" {
   tags = var.tags
 
   depends_on = [
-    aws_iam_role_policy_attachment.quortex-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.quortex-AmazonEKSServicePolicy,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_cluster_policy,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_service_policy,
     aws_cloudwatch_log_group.cluster_logs
   ]
 }
@@ -120,7 +120,7 @@ resource "aws_eks_node_group" "quortex" {
   lifecycle {
     ignore_changes = [
       # ignore changes to the cluster size, because it can be changed by autoscaling
-      scaling_config.0.desired_size,
+      scaling_config[0].desired_size,
     ]
   }
 
@@ -157,9 +157,9 @@ resource "aws_eks_node_group" "quortex" {
   )
 
   depends_on = [
-    aws_iam_role_policy_attachment.quortex-AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.quortex-AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.quortex-AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_worker_node_policy,
+    aws_iam_role_policy_attachment.quortex_amazon_eks_cni_policy,
+    aws_iam_role_policy_attachment.quortex_amazon_ec2_container_registry_readonly,
   ]
 }
 
@@ -167,12 +167,12 @@ resource "aws_eks_node_group" "quortex" {
 resource "aws_eks_addon" "quortex_addon" {
   for_each = { for k, v in var.cluster_addons : k => v }
 
-  cluster_name         = aws_eks_cluster.quortex.name
-  addon_name           = each.key
-  addon_version        = each.value.version
-  configuration_values = try(each.value.configuration_values, null)
-  preserve             = try(each.value.preserve, null)
-  resolve_conflicts_on_update    = try(each.value.resolve_conflicts, "OVERWRITE")
+  cluster_name                = aws_eks_cluster.quortex.name
+  addon_name                  = each.key
+  addon_version               = each.value.version
+  configuration_values        = try(each.value.configuration_values, null)
+  preserve                    = try(each.value.preserve, null)
+  resolve_conflicts_on_update = try(each.value.resolve_conflicts, "OVERWRITE")
 
   tags = var.tags
 }

@@ -1,0 +1,27 @@
+name: Checks
+
+on:
+  push:
+
+env:
+  TFLINT_VERSION: "v0.47.0"
+  TFDOCS_VERSION: "v0.16.0"
+
+jobs:
+  precommit:
+    name: Run precommit-hooks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          curl -sSLo ./terraform-docs.tar.gz https://terraform-docs.io/dl/v0.16.0/terraform-docs-${TFDOCS_VERSION}-$(uname)-amd64.tar.gz
+          tar -xzf terraform-docs.tar.gz
+          chmod +x terraform-docs
+          sudo mv terraform-docs /usr/bin/terraform-docs
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v3
+
+      - uses: pre-commit/action@v3.0.0

@@ -63,13 +63,13 @@ POLICY
   }
 }
 
-resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_cluster_policy" {
   count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.quortex_role_master[0].name
 }
 
-resource "aws_iam_role_policy_attachment" "quortex-AmazonEKSServicePolicy" {
+resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_service_policy" {
   count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = aws_iam_role.quortex_role_master[0].name

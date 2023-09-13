@@ -28,7 +28,7 @@ output "autoscaling_group_names" {
 
 output "autoscaling_group_names_map" {
   value = {
-    "managed"  = { for k, v in aws_eks_node_group.quortex : k => try(v.resources.0.autoscaling_groups.0.name, "") },
+    "managed"  = { for k, v in aws_eks_node_group.quortex : k => try(v.resources[0].autoscaling_groups[0].name, "") },
     "advanced" = { for k, v in aws_autoscaling_group.quortex_asg_advanced : k => v.name }
   }
   description = "A map containing the names of the created autoscaling groups."
@@ -50,7 +50,7 @@ output "cluster_security_group_id" {
 }
 
 output "cluster_certificate_authority_data" {
-  value       = aws_eks_cluster.quortex.certificate_authority.0.data
+  value       = aws_eks_cluster.quortex.certificate_authority[0].data
   description = "The base64 encoded certificate data required to communicate with the cluster."
   sensitive   = true
 }

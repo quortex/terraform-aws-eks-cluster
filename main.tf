@@ -173,6 +173,7 @@ resource "aws_eks_addon" "quortex_addon" {
   configuration_values        = try(each.value.configuration_values, null)
   preserve                    = try(each.value.preserve, null)
   resolve_conflicts_on_update = try(each.value.resolve_conflicts, "OVERWRITE")
+  resolve_conflicts_on_create = try(each.value.resolve_conflicts, "OVERWRITE")
 
   tags = var.tags
 }

@@ -22,24 +22,20 @@ resource "aws_iam_role" "quortex_role_worker" {
   description = "IAM Role to allow the worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster."
   tags        = var.tags
 
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  assume_role_policy = jsonencode(
     {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Principal = {
+            Service = "ec2.amazonaws.com"
+          },
+          Action = "sts:AssumeRole"
+        }
+      ]
+  })
 }
-POLICY
-}
-
-
-# IAM role policies
 
 resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_worker_node_policy" {
   count      = var.handle_iam_resources ? 1 : 0

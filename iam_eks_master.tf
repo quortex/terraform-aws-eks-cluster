@@ -23,20 +23,19 @@ resource "aws_iam_role" "quortex_role_master" {
   description = "IAM Role to allow EKS service to manage other AWS services"
   tags        = var.tags
 
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  assume_role_policy = jsonencode(
     {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-POLICY
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Principal = {
+            Service = "eks.amazonaws.com"
+          },
+          Action = "sts:AssumeRole"
+        }
+      ]
+  })
 
   # Fix issue where cloudwatch log group was not deleted correctly
   # Retrieved from https://github.com/terraform-aws-modules/terraform-aws-eks/issues/920

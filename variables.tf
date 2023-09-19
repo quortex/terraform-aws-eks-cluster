@@ -57,6 +57,12 @@ variable "ebs_csi_driver_role_name" {
   default     = "quortex-ebs-csi-driver"
 }
 
+variable "aws_vpc_cni_role_name" {
+  type        = string
+  description = "A name to be used as the AWS resource name for the Amazon VPC CNI role."
+  default     = "quortex-vpc-cni"
+}
+
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes master version."
@@ -157,6 +163,12 @@ variable "handle_iam_resources" {
 variable "handle_iam_ebs_csi_driver" {
   type        = bool
   description = "Wether to handle IAM resources lifecycle for Amazon EBS CSI Driver"
+  default     = true
+}
+
+variable "handle_iam_aws_vpc_cni" {
+  type        = bool
+  description = "Wether to handle IAM resources lifecycle for Amazon VPC CNI"
   default     = true
 }
 

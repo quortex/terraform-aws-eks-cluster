@@ -163,6 +163,12 @@ resource "aws_eks_node_group" "quortex" {
   ]
 }
 
+locals {
+  addon_irsa_service_account_arn = {
+    vpc-cni = try(aws_iam_role.aws_vpc_cni[0].arn, null)
+  }
+}
+
 # Eks addons
 resource "aws_eks_addon" "quortex_addon" {
   for_each = { for k, v in var.cluster_addons : k => v }
@@ -174,6 +180,7 @@ resource "aws_eks_addon" "quortex_addon" {
   preserve                    = try(each.value.preserve, null)
   resolve_conflicts_on_update = try(each.value.resolve_conflicts, "OVERWRITE")
   resolve_conflicts_on_create = try(each.value.resolve_conflicts, "OVERWRITE")
+  service_account_role_arn    = lookup(local.addon_irsa_service_account_arn, each.key, null)
 
   tags = var.tags
 }

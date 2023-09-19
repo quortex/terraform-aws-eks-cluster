@@ -14,12 +14,19 @@
  * limitations under the License.
 */
 
-# IAM Role to allow the worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster.
+# EKS Managed worker nodes IAM
+#
+# IAM Role to allow the worker nodes to manage or retrieve data from other AWS
+# services. It is used by Kubernetes to allow worker nodes to join the cluster.
+
+locals {
+  handle_quortex_role_worker_iam = var.handle_iam_resources && length(var.node_groups) > 0
+}
 
 resource "aws_iam_role" "quortex_role_worker" {
-  count       = var.handle_iam_resources ? 1 : 0
+  count       = local.handle_quortex_role_worker_iam ? 1 : 0
   name        = var.worker_role_name
-  description = "IAM Role to allow the worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster."
+  description = "IAM Role to allow the EKS managed worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster."
   tags        = var.tags
 
   assume_role_policy = jsonencode(
@@ -38,13 +45,55 @@ resource "aws_iam_role" "quortex_role_worker" {
 }
 
 resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_worker_node_policy" {
-  count      = var.handle_iam_resources ? 1 : 0
+  count      = local.handle_quortex_role_worker_iam ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.quortex_role_worker[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "quortex_amazon_ec2_container_registry_readonly" {
-  count      = var.handle_iam_resources ? 1 : 0
+  count      = local.handle_quortex_role_worker_iam ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.quortex_role_worker[0].name
+}
+
+# Self managed worker nodes IAM
+#
+# IAM Role to allow the worker nodes to manage or retrieve data from other AWS
+# services. It is used by Kubernetes to allow worker nodes to join the cluster.
+
+locals {
+  handle_quortex_role_self_managed_worker_iam = var.handle_iam_resources && length(var.node_groups_advanced) > 0
+}
+
+resource "aws_iam_role" "quortex_role_self_managed_worker" {
+  count       = local.handle_quortex_role_self_managed_worker_iam ? 1 : 0
+  name        = var.self_managed_worker_role_name
+  description = "IAM Role to allow the self managed worker nodes to manage or retrieve data from other AWS services. It is used by Kubernetes to allow worker nodes to join the cluster."
+  tags        = var.tags
+
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+        {
+          Effect = "Allow",
+          Principal = {
+            Service = "ec2.amazonaws.com"
+          },
+          Action = "sts:AssumeRole"
+        }
+      ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "quortex_self_managed_amazon_eks_worker_node_policy" {
+  count      = local.handle_quortex_role_self_managed_worker_iam ? 1 : 0
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.quortex_role_self_managed_worker[0].name
+}
+
+resource "aws_iam_role_policy_attachment" "quortex_self_managed_amazon_ec2_container_registry_readonly" {
+  count      = local.handle_quortex_role_self_managed_worker_iam ? 1 : 0
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.quortex_role_self_managed_worker[0].name
 }

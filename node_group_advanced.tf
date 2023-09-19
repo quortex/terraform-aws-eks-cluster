@@ -60,9 +60,9 @@ data "aws_ec2_instance_type_offerings" "available" {
 # Common resources
 
 resource "aws_iam_instance_profile" "quortex" {
-  count = var.handle_iam_resources ? 1 : 0
+  count = local.handle_quortex_role_self_managed_worker_iam ? 1 : 0
   name  = var.instance_profile_name
-  role  = aws_iam_role.quortex_role_worker[0].name
+  role  = aws_iam_role.quortex_role_self_managed_worker[0].name
 }
 
 data "aws_ami" "eks_worker_image" {
@@ -301,4 +301,5 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     }
   }
 
+  depends_on = [kubernetes_config_map_v1_data.aws_auth]
 }

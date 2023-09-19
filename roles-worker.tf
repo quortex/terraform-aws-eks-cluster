@@ -47,12 +47,6 @@ resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_worker_node_policy
   role       = aws_iam_role.quortex_role_worker[0].name
 }
 
-resource "aws_iam_role_policy_attachment" "quortex_amazon_eks_cni_policy" {
-  count      = var.handle_iam_resources ? 1 : 0
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.quortex_role_worker[0].name
-}
-
 resource "aws_iam_role_policy_attachment" "quortex_amazon_ec2_container_registry_readonly" {
   count      = var.handle_iam_resources ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"

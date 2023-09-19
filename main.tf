@@ -158,7 +158,6 @@ resource "aws_eks_node_group" "quortex" {
 
   depends_on = [
     aws_iam_role_policy_attachment.quortex_amazon_eks_worker_node_policy,
-    aws_iam_role_policy_attachment.quortex_amazon_eks_cni_policy,
     aws_iam_role_policy_attachment.quortex_amazon_ec2_container_registry_readonly,
   ]
 }

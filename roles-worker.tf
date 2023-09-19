@@ -58,36 +58,3 @@ resource "aws_iam_role_policy_attachment" "quortex_amazon_ec2_container_registry
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.quortex_role_worker[0].name
 }
-
-### Attach a new policy for the cloudwatch-exporter to the worker role
-
-resource "aws_iam_policy" "quortex_cloudwatch_policy" {
-  count = var.handle_iam_resources && var.add_cloudwatch_permissions ? 1 : 0
-
-  description = "Allow the cloudwatch-exporter to make calls to the AWS CloudWatch APIs."
-
-  policy = <<POLICY
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "cloudwatch:ListMetrics",
-                "cloudwatch:GetMetricStatistics",
-                "cloudwatch:GetMetricData",
-                "tag:GetResources"
-            ],
-            "Resource": "*",
-            "Effect": "Allow"
-        }
-    ]
-}
-POLICY
-}
-
-resource "aws_iam_role_policy_attachment" "quortex_cloudwatch_policy_attach" {
-  count = var.handle_iam_resources && var.add_cloudwatch_permissions ? 1 : 0
-
-  role       = aws_iam_role.quortex_role_worker[0].name
-  policy_arn = aws_iam_policy.quortex_cloudwatch_policy[0].arn
-}

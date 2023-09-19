@@ -57,10 +57,36 @@ variable "ebs_csi_driver_role_name" {
   default     = "quortex-ebs-csi-driver"
 }
 
+variable "ebs_csi_driver_sa" {
+  description = "Service Account name for EBS CSI Driver"
+
+  type = object({
+    namespace = string
+    name      = string
+  })
+  default = {
+    namespace = "kube-system"
+    name      = "ebs-csi-controller-sa"
+  }
+}
+
 variable "aws_vpc_cni_role_name" {
   type        = string
   description = "A name to be used as the AWS resource name for the Amazon VPC CNI role."
   default     = "quortex-vpc-cni"
+}
+
+variable "aws_vpc_cni_sa" {
+  description = "Service Account name for Amazon VPC CNI"
+
+  type = object({
+    namespace = string
+    name      = string
+  })
+  default = {
+    namespace = "kube-system"
+    name      = "aws-node"
+  }
 }
 
 variable "kubernetes_version" {

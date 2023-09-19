@@ -1,29 +1,27 @@
-
 resource "aws_iam_role" "quortex_role_autoscaler" {
   count       = var.handle_iam_resources ? 1 : 0
   name        = var.autoscaler_role_name
   description = "IAM Role to allow the autoscaler service account to manage AWS Autoscaling."
   tags        = var.tags
 
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Federated": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${local.cluster_oidc_issuer}"
-      },
-      "Action": "sts:AssumeRoleWithWebIdentity",
-      "Condition": {
-        "StringEquals": {
-          "${local.cluster_oidc_issuer}:sub": "system:serviceaccount:${var.autoscaler_sa.namespace}:${var.autoscaler_sa.name}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${local.cluster_oidc_issuer}"
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${local.cluster_oidc_issuer}:aud" : "sts.amazonaws.com"
+            "${local.cluster_oidc_issuer}:sub" : "system:serviceaccount:${var.autoscaler_sa.namespace}:${var.autoscaler_sa.name}"
+          }
         }
       }
-    }
-  ]
-}
-POLICY
+    ]
+  })
 }
 
 ### Attach a new policy for the cluster-autoscaler role

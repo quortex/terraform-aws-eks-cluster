@@ -165,7 +165,8 @@ resource "aws_eks_node_group" "quortex" {
 
 locals {
   addon_irsa_service_account_arn = {
-    vpc-cni = try(aws_iam_role.aws_vpc_cni[0].arn, null)
+    vpc-cni            = try(aws_iam_role.aws_vpc_cni[0].arn, null)
+    aws-ebs-csi-driver = try(aws_iam_role.ebs_csi_driver[0].arn, null)
   }
 }
 

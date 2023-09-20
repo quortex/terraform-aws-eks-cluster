@@ -28,8 +28,14 @@ variable "master_role_name" {
 
 variable "worker_role_name" {
   type        = string
-  description = "A name to be used as the AWS resource name for the worker role"
-  default     = "quortex-worker"
+  description = "A name to be used as the AWS resource name for the IAM role used by EKS managed worker nodes"
+  default     = "quortex-worker-managed"
+}
+
+variable "self_managed_worker_role_name" {
+  type        = string
+  description = "A name to be used as the AWS resource name for the IAM role used by self managed worker nodes"
+  default     = "quortex-worker-self-managed"
 }
 
 variable "autoscaler_role_name" {
@@ -57,10 +63,36 @@ variable "ebs_csi_driver_role_name" {
   default     = "quortex-ebs-csi-driver"
 }
 
+variable "ebs_csi_driver_sa" {
+  description = "Service Account name for EBS CSI Driver"
+
+  type = object({
+    namespace = string
+    name      = string
+  })
+  default = {
+    namespace = "kube-system"
+    name      = "ebs-csi-controller-sa"
+  }
+}
+
 variable "aws_vpc_cni_role_name" {
   type        = string
   description = "A name to be used as the AWS resource name for the Amazon VPC CNI role."
   default     = "quortex-vpc-cni"
+}
+
+variable "aws_vpc_cni_sa" {
+  description = "Service Account name for Amazon VPC CNI"
+
+  type = object({
+    namespace = string
+    name      = string
+  })
+  default = {
+    namespace = "kube-system"
+    name      = "aws-node"
+  }
 }
 
 variable "kubernetes_version" {
@@ -148,12 +180,6 @@ variable "remote_access_allowed_ip_ranges" {
   default     = []
 }
 
-variable "add_cloudwatch_permissions" {
-  type        = bool
-  description = "If true, the CloudWatch permissions will be added to the worker node role"
-  default     = false
-}
-
 variable "handle_iam_resources" {
   type        = bool
   description = "Wether to handle IAM resource lifecycle (master role / worker role / IAM instance profile for worker nodes...)"
@@ -200,4 +226,34 @@ variable "cluster_addons" {
   description = "Map of cluster addon configurations to enable for the cluster.`"
   type        = any
   default     = {}
+}
+
+variable "manage_aws_auth_configmap" {
+  description = "Determines whether to manage the aws-auth configmap."
+  type        = bool
+  default     = false
+}
+
+variable "create_aws_auth_configmap" {
+  description = "Determines whether to create the aws-auth configmap. NOTE - this is only intended for scenarios where the configmap does not exist (i.e. - when using only self-managed node groups)."
+  type        = bool
+  default     = false
+}
+
+variable "aws_auth_roles" {
+  description = "List of role maps to add to the aws-auth configmap. For more information, see https://github.com/kubernetes-sigs/aws-iam-authenticator#full-configuration-format."
+  type        = list(any)
+  default     = []
+}
+
+variable "aws_auth_users" {
+  description = "List of user maps to add to the aws-auth configmap. For more information, see https://github.com/kubernetes-sigs/aws-iam-authenticator#full-configuration-format."
+  type        = list(any)
+  default     = []
+}
+
+variable "aws_auth_accounts" {
+  description = "List of account maps to add to the aws-auth configmap. For more information, see https://github.com/kubernetes-sigs/aws-iam-authenticator#full-configuration-format."
+  type        = list(any)
+  default     = []
 }

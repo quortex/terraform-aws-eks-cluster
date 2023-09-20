@@ -8,18 +8,18 @@ resource "aws_iam_role" "aws_vpc_cni" {
   description = "IAM Role required for Amazon VPC CNI."
 
   assume_role_policy = jsonencode({
-    "Version" : "2012-10-17",
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow",
+        Effect = "Allow"
         Principal = {
           Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${local.cluster_oidc_issuer}"
-        },
-        Action = "sts:AssumeRoleWithWebIdentity",
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.cluster_oidc_issuer}:aud" : "sts.amazonaws.com",
-            "${local.cluster_oidc_issuer}:sub" : "system:serviceaccount:kube-system:aws-node"
+            "${local.cluster_oidc_issuer}:aud" : "sts.amazonaws.com"
+            "${local.cluster_oidc_issuer}:sub" : "system:serviceaccount:${var.aws_vpc_cni_sa.namespace}:${var.aws_vpc_cni_sa.name}"
           }
         }
       }

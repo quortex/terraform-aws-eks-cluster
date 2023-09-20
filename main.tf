@@ -108,7 +108,7 @@ resource "aws_eks_node_group" "quortex" {
   cluster_name    = aws_eks_cluster.quortex.name
   version         = var.kubernetes_worker_nodes_version
   node_group_name = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
-  node_role_arn   = var.handle_iam_resources ? aws_iam_role.quortex_role_worker[0].arn : var.worker_role_arn
+  node_role_arn   = local.handle_quortex_role_worker_iam ? aws_iam_role.quortex_role_worker[0].arn : var.worker_role_arn
   subnet_ids      = lookup(each.value, "subnet_ids", [])
 
   scaling_config {
@@ -158,14 +158,15 @@ resource "aws_eks_node_group" "quortex" {
 
   depends_on = [
     aws_iam_role_policy_attachment.quortex_amazon_eks_worker_node_policy,
-    aws_iam_role_policy_attachment.quortex_amazon_eks_cni_policy,
     aws_iam_role_policy_attachment.quortex_amazon_ec2_container_registry_readonly,
+    kubernetes_config_map_v1_data.aws_auth
   ]
 }
 
 locals {
   addon_irsa_service_account_arn = {
-    vpc-cni = try(aws_iam_role.aws_vpc_cni[0].arn, null)
+    vpc-cni            = try(aws_iam_role.aws_vpc_cni[0].arn, null)
+    aws-ebs-csi-driver = try(aws_iam_role.ebs_csi_driver[0].arn, null)
   }
 }
 

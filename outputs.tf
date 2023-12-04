@@ -79,3 +79,8 @@ output "cluster_autoscaler_role_arn" {
   value       = try(aws_iam_role.quortex_role_autoscaler[0].arn, null)
   description = "The ARN identifier of the role created in AWS for the Cluster Autoscaler."
 }
+
+output "aws_load_balancer_controller_role_arn" {
+  value       = try(aws_iam_role.aws_load_balancer_controller[0].arn, null)
+  description = "The ARN identifier of the role created in AWS for the aws-load-balancer-controller."
+}

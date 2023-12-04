@@ -95,6 +95,25 @@ variable "aws_vpc_cni_sa" {
   }
 }
 
+variable "aws_load_balancer_controller_role_name" {
+  type        = string
+  description = "A name to be used as the AWS resource name for the aws-load-balancer-controller role."
+  default     = "quortex-aws-load-balancer-controller"
+}
+
+variable "aws_load_balancer_controller_sa" {
+  description = "Service Account name for aws-load-balancer-controller"
+
+  type = object({
+    namespace = string
+    name      = string
+  })
+  default = {
+    namespace = "kube-system"
+    name      = "aws-load-balancer-controller"
+  }
+}
+
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes master version."
@@ -196,6 +215,12 @@ variable "handle_iam_aws_vpc_cni" {
   type        = bool
   description = "Wether to handle IAM resources lifecycle for Amazon VPC CNI"
   default     = true
+}
+
+variable "handle_iam_aws_load_balancer_controller" {
+  type        = bool
+  description = "Whether to handle IAM resources lifecycle for aws-load-balancer-controller addon"
+  default     = false
 }
 
 variable "master_role_arn" {

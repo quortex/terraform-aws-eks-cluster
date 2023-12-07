@@ -184,6 +184,13 @@ resource "aws_eks_addon" "quortex_addon" {
   service_account_role_arn    = lookup(local.addon_irsa_service_account_arn, each.key, null)
 
   tags = var.tags
+
+  depends_on = [
+    aws_eks_node_group.quortex,
+    aws_autoscaling_group.quortex_asg_advanced,
+    aws_eks_cluster.quortex,
+    aws_iam_openid_connect_provider.quortex_cluster
+  ]
 }
 
 # This AWS CLI command will add tags to the ASG created by EKS

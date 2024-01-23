@@ -12,7 +12,7 @@ locals {
   # Formats data to be written to aws-auth configmap.
   aws_auth_configmap_data = {
     mapRoles = replace(yamlencode(concat(
-      [for r in concat(aws_iam_role.quortex_role_worker, aws_iam_role.quortex_role_self_managed_worker) : {
+      [for r in aws_iam_role.quortex_role_worker : {
         rolearn  = r.arn
         username = "system:node:{{EC2PrivateDNSName}}"
         groups = [

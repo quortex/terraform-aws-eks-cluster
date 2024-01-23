@@ -32,12 +32,6 @@ variable "worker_role_name" {
   default     = "quortex-worker-managed"
 }
 
-variable "self_managed_worker_role_name" {
-  type        = string
-  description = "A name to be used as the AWS resource name for the IAM role used by self managed worker nodes"
-  default     = "quortex-worker-self-managed"
-}
-
 variable "autoscaler_role_name" {
   type        = string
   description = "A name to be used as the AWS resource name for the autoscaler role"

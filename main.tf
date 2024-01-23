@@ -108,7 +108,7 @@ resource "aws_eks_node_group" "quortex" {
   cluster_name    = aws_eks_cluster.quortex.name
   version         = var.kubernetes_worker_nodes_version
   node_group_name = lookup(each.value, "name", "${var.cluster_name}_${each.key}")
-  node_role_arn   = local.handle_quortex_role_worker_iam ? aws_iam_role.quortex_role_worker[0].arn : var.worker_role_arn
+  node_role_arn   = var.handle_iam_resources ? aws_iam_role.quortex_role_worker[0].arn : var.worker_role_arn
   subnet_ids      = lookup(each.value, "subnet_ids", [])
 
   scaling_config {

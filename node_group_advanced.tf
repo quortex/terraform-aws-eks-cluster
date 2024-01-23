@@ -60,9 +60,9 @@ data "aws_ec2_instance_type_offerings" "available" {
 # Common resources
 
 resource "aws_iam_instance_profile" "quortex" {
-  count = local.handle_quortex_role_self_managed_worker_iam ? 1 : 0
+  count = var.handle_iam_resources ? 1 : 0
   name  = var.instance_profile_name
-  role  = aws_iam_role.quortex_role_self_managed_worker[0].name
+  role  = aws_iam_role.quortex_role_worker[0].name
 }
 
 data "aws_ami" "eks_worker_image" {

@@ -183,6 +183,11 @@ resource "aws_eks_addon" "quortex_addon" {
   resolve_conflicts_on_create = try(each.value.resolve_conflicts, "OVERWRITE")
   service_account_role_arn    = lookup(local.addon_irsa_service_account_arn, each.key, null)
 
+  depends_on = [
+    aws_eks_node_group.quortex,
+    aws_autoscaling_group.quortex_asg_advanced,
+  ]
+
   tags = var.tags
 }
 

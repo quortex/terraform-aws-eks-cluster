@@ -1,0 +1,16 @@
+manifests: |-
+  {{- range .Values.eniConfigs }}
+  apiVersion: crd.k8s.amazonaws.com/v1alpha1
+  kind: ENIConfig
+  metadata:
+    name: {{ .name }}
+  spec:
+    subnet: {{ .subnet }}
+    {{- with .securityGroups }}
+    securityGroups:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ---
+  {{- end }}
+
+eniConfigs: ${eniConfigs}

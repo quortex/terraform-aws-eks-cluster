@@ -121,6 +121,7 @@ variable "external_dns_sa" {
     namespace = string
     name      = string
   })
+
   default = {
     namespace = "kube-system"
     name      = "external-dns"

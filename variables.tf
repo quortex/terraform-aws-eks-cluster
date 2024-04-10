@@ -108,6 +108,26 @@ variable "aws_load_balancer_controller_sa" {
   }
 }
 
+variable "external_dns_role_name" {
+  type        = string
+  description = "A name to be used as the AWS resource name for the external-dns role."
+  default     = "quortex-external-dns"
+}
+
+variable "external_dns_sa" {
+  description = "Service Account name for external-dns"
+
+  type = object({
+    namespace = string
+    name      = string
+  })
+
+  default = {
+    namespace = "kube-system"
+    name      = "external-dns"
+  }
+}
+
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes master version."
@@ -214,6 +234,12 @@ variable "handle_iam_aws_vpc_cni" {
 variable "handle_iam_aws_load_balancer_controller" {
   type        = bool
   description = "Whether to handle IAM resources lifecycle for aws-load-balancer-controller addon"
+  default     = false
+}
+
+variable "handle_iam_external_dns" {
+  type        = bool
+  description = "Whether to handle IAM resources lifecycle for external-dns addon"
   default     = false
 }
 

@@ -89,6 +89,21 @@ resource "aws_eks_cluster" "quortex" {
   ]
 }
 
+resource "aws_security_group_rule" "cluster_security_group_additional" {
+  for_each = var.cluster_security_group_additional_rules
+
+  security_group_id        = aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id
+  description              = each.value.description
+  protocol                 = each.value.protocol
+  type                     = each.value.type
+  from_port                = each.value.from_port
+  to_port                  = each.value.to_port
+  cidr_blocks              = each.value.cidr_blocks
+  ipv6_cidr_blocks         = each.value.ipv6_cidr_blocks
+  prefix_list_ids          = each.value.prefix_list_ids
+  source_security_group_id = each.value.source_security_group_id
+}
+
 data "tls_certificate" "quortex_cluster" {
   url = aws_eks_cluster.quortex.identity[0].oidc[0].issuer
 }

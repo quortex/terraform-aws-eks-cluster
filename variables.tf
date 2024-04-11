@@ -302,3 +302,19 @@ variable "aws_auth_accounts" {
   type        = list(any)
   default     = []
 }
+
+variable "cluster_security_group_additional_rules" {
+  description = "Additional rules for cluster security group."
+  type = map(object({
+    description              = optional(string)
+    protocol                 = string
+    type                     = string
+    from_port                = number
+    to_port                  = number
+    cidr_blocks              = optional(list(string))
+    ipv6_cidr_blocks         = optional(list(string))
+    prefix_list_ids          = optional(list(string))
+    source_security_group_id = optional(string)
+  }))
+  default = {}
+}

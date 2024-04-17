@@ -15,6 +15,11 @@
 */
 
 locals {
+  eni_configs = [for e in var.pods_subnets : {
+    name           = e.availability_zone
+    subnet         = e.id
+    securityGroups = [aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id]
+  }]
   # The Quortex cluster OIDC issuer.
   cluster_oidc_issuer = trimprefix(aws_eks_cluster.quortex.identity[0].oidc[0].issuer, "https://")
   node_group_labels = [
@@ -263,4 +268,19 @@ resource "aws_cloudwatch_log_group" "cluster_logs" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = var.cluster_logs_retention
   tags              = var.tags
+}
+
+resource "helm_release" "eni_configs" {
+  count      = var.handle_eni_configs ? 1 : 0
+  version    = "1.0.0"
+  chart      = "empty"
+  repository = "https://quortex.github.io/helm-charts"
+  name       = "aws-vpc-cni-config"
+
+  values = [
+    templatefile("${path.module}/templates/eniconfigs.yaml", {
+      eniConfigs : jsonencode(local.eni_configs)
+    })
+  ]
+  depends_on = [aws_eks_addon.quortex_addon]
 }

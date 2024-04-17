@@ -167,6 +167,21 @@ variable "master_authorized_networks" {
   default     = {}
 }
 
+variable "pods_subnets" {
+  type        = map(object({ id = string, availability_zone = string, cidr = string, public = bool }))
+  description = <<EOT
+A map representing the pods subnets. Each item contains the subnet's ID,
+Availability Zone, cidr block, and whether the subnet is public or not.
+EOT
+  default     = {}
+}
+
+variable "handle_eni_configs" {
+  type        = bool
+  description = "To determine if eniconfig resources should be managed by this module"
+  default     = false
+}
+
 variable "tags" {
   type        = map(any)
   description = "The EKS resource tags (a map of key/value pairs) to be applied to the cluster."

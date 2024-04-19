@@ -271,7 +271,7 @@ resource "aws_cloudwatch_log_group" "cluster_logs" {
 }
 
 resource "helm_release" "eni_configs" {
-  count      = var.handle_eni_configs ? 1 : 0
+  count      = var.handle_eni_configs && try(var.cluster_addons["vpc-cni"].enabled, false) ? 1 : 0
   version    = "1.0.0"
   chart      = "empty"
   repository = "https://quortex.github.io/helm-charts"
@@ -282,5 +282,5 @@ resource "helm_release" "eni_configs" {
       eniConfigs : jsonencode(local.eni_configs)
     })
   ]
-  depends_on = [aws_eks_addon.quortex_addon]
+  depends_on = [aws_eks_addon.quortex_addon["vpc-cni"]]
 }

@@ -190,9 +190,24 @@ locals {
   }
 }
 
+resource "aws_eks_addon" "vpc_cni_addon" {
+  count = local.handle_aws_vpc_cni ? 1 : 0
+
+  cluster_name                = aws_eks_cluster.quortex.name
+  addon_name                  = "vpc-cni"
+  addon_version               = var.cluster_addons["vpc-cni"].version
+  configuration_values        = try(var.cluster_addons["vpc-cni"].configuration_values, null)
+  preserve                    = try(var.cluster_addons["vpc-cni"].preserve, null)
+  resolve_conflicts_on_update = try(var.cluster_addons["vpc-cni"].resolve_conflicts, "OVERWRITE")
+  resolve_conflicts_on_create = try(var.cluster_addons["vpc-cni"].resolve_conflicts, "OVERWRITE")
+  service_account_role_arn    = lookup(local.addon_irsa_service_account_arn, "vpc-cni", null)
+
+  tags = var.tags
+}
+
 # Eks addons
 resource "aws_eks_addon" "quortex_addon" {
-  for_each = { for k, v in var.cluster_addons : k => v }
+  for_each = { for k, v in var.cluster_addons : k => v if k != "vpc-cni" }
 
   cluster_name                = aws_eks_cluster.quortex.name
   addon_name                  = each.key
@@ -204,6 +219,8 @@ resource "aws_eks_addon" "quortex_addon" {
   service_account_role_arn    = lookup(local.addon_irsa_service_account_arn, each.key, null)
 
   tags = var.tags
+
+  depends_on = [helm_release.eni_configs]
 }
 
 # This AWS CLI command will add tags to the ASG created by EKS
@@ -271,7 +288,7 @@ resource "aws_cloudwatch_log_group" "cluster_logs" {
 }
 
 resource "helm_release" "eni_configs" {
-  count      = var.handle_eni_configs && try(var.cluster_addons["vpc-cni"].enabled, false) ? 1 : 0
+  count      = var.handle_eni_configs ? 1 : 0
   version    = "1.0.0"
   chart      = "empty"
   repository = "https://quortex.github.io/helm-charts"
@@ -282,5 +299,5 @@ resource "helm_release" "eni_configs" {
       eniConfigs : jsonencode(local.eni_configs)
     })
   ]
-  depends_on = [aws_eks_addon.quortex_addon["vpc-cni"]]
+  depends_on = [aws_eks_addon.vpc_cni_addon]
 }

@@ -210,6 +210,12 @@ variable "node_use_max_pods" {
   description = "Set to false to prevent EKS from setting --max-pods in Kubelet config. By default, EKS sets the maximum number of pods that can run on the node, based on the instance type. Disabling this can be useful when using a CNI other than the default, like Calico."
 }
 
+variable "node_use_max_pods_allowed" {
+  type        = bool
+  default     = false
+  description = "Set to use max number of pods allowed to run in node instead of recommended value"
+}
+
 variable "instance_profile_name" {
   type        = string
   description = "A name for the instance profile resource in AWS. Used only when node_groups_advanced is used."

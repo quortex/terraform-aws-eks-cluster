@@ -290,6 +290,8 @@ resource "aws_iam_policy" "aws_load_balancer_controller" {
       }
     ]
   })
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {

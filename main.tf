@@ -119,6 +119,8 @@ resource "aws_iam_openid_connect_provider" "quortex_cluster" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.quortex_cluster.certificates[0].sha1_fingerprint]
   url             = aws_eks_cluster.quortex.identity[0].oidc[0].issuer
+
+  tags = var.tags
 }
 
 # Worker nodes

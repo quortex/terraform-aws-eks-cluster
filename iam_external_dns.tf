@@ -74,6 +74,8 @@ resource "aws_iam_policy" "external_dns" {
       }
     ]
   })
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "external_dns" {

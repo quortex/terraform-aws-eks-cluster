@@ -75,6 +75,8 @@ resource "aws_iam_policy" "ebs_csi_driver" {
       }
     ]
   })
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {

@@ -63,6 +63,7 @@ resource "aws_iam_instance_profile" "quortex" {
   count = var.handle_iam_resources ? 1 : 0
   name  = var.instance_profile_name
   role  = aws_iam_role.quortex_role_worker[0].name
+  tags  = var.tags
 }
 
 data "aws_ami" "eks_worker_image" {
@@ -126,7 +127,6 @@ resource "aws_launch_template" "quortex_launch_tpl" {
           }
         )
       }
-
     )
   )
 
@@ -164,7 +164,6 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     },
     var.tags
   )
-
 }
 
 # For each node group, create an autoscaling group based on the launch template

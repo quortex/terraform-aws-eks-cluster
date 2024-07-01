@@ -258,6 +258,12 @@ variable "handle_iam_aws_load_balancer_controller" {
   default     = false
 }
 
+variable "handle_iam_cluster_autoscaler" {
+  type        = bool
+  description = "Wether to handle IAM resources lifecycle for cluster-autoscaler"
+  default     = true
+}
+
 variable "handle_iam_external_dns" {
   type        = bool
   description = "Whether to handle IAM resources lifecycle for external-dns addon"

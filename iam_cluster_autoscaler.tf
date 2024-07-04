@@ -1,5 +1,9 @@
+locals {
+  handle_iam_cluster_autoscaler = var.handle_iam_resources && var.handle_iam_cluster_autoscaler
+}
+
 resource "aws_iam_role" "quortex_role_autoscaler" {
-  count       = var.handle_iam_resources ? 1 : 0
+  count       = local.handle_iam_cluster_autoscaler ? 1 : 0
   name        = var.autoscaler_role_name
   description = "IAM Role to allow the autoscaler service account to manage AWS Autoscaling."
   tags        = var.tags
@@ -29,7 +33,7 @@ resource "aws_iam_role" "quortex_role_autoscaler" {
 # Inspired by https://github.com/terraform-aws-modules/terraform-aws-iam/blob/263426fbb6cb8b0d59fb6b2a86168047ff1e58ac/modules/iam-role-for-service-accounts-eks/policies.tf#L48
 
 data "aws_iam_policy_document" "cluster_autoscaler" {
-  count = var.handle_iam_resources ? 1 : 0
+  count = local.handle_iam_cluster_autoscaler ? 1 : 0
 
   statement {
     actions = [
@@ -67,7 +71,7 @@ data "aws_iam_policy_document" "cluster_autoscaler" {
 }
 
 resource "aws_iam_policy" "quortex_autoscaler_policy" {
-  count = var.handle_iam_resources ? 1 : 0
+  count = local.handle_iam_cluster_autoscaler ? 1 : 0
 
   description = "Allow the autoscaler to make calls to the AWS APIs."
   policy      = data.aws_iam_policy_document.cluster_autoscaler[0].json
@@ -76,7 +80,7 @@ resource "aws_iam_policy" "quortex_autoscaler_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "quortex_autoscaler_policy_attach" {
-  count      = var.handle_iam_resources ? 1 : 0
+  count      = local.handle_iam_cluster_autoscaler ? 1 : 0
   role       = aws_iam_role.quortex_role_autoscaler[0].name
   policy_arn = aws_iam_policy.quortex_autoscaler_policy[0].arn
 }

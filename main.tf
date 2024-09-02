@@ -45,7 +45,7 @@ locals {
         nodegroup : key,
         "k8s.io/cluster-autoscaler/node-template/label/nodegroup" : key
         },
-        merge(local.node_group_labels[0][key]...),
+        length(local.node_group_labels) > 0 && try(local.node_group_labels[0][key], null) != null ? merge(local.node_group_labels[0][key]...) : {},
         merge(local.node_groups_tags[key]),
         var.tags,
         var.compute_tags

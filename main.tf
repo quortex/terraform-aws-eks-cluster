@@ -15,11 +15,18 @@
 */
 
 locals {
-  eni_configs = [for e in var.pods_subnets : {
-    name           = e.availability_zone
-    subnet         = e.id
-    securityGroups = [aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id]
-  }]
+  vpc_cni_configuration_values = var.handle_eni_configs ? {
+    "eniConfig" : {
+      "create" : true,
+      "region" : data.aws_region.current.name,
+      "subnets" : { for e in var.pods_subnets :
+        e.availability_zone => {
+          id             = e.id
+          securityGroups = [aws_eks_cluster.quortex.vpc_config[0].cluster_security_group_id]
+        }
+      }
+    }
+  } : null
   # The Quortex cluster OIDC issuer.
   cluster_oidc_issuer = trimprefix(aws_eks_cluster.quortex.identity[0].oidc[0].issuer, "https://")
   node_group_labels = [
@@ -193,15 +200,15 @@ locals {
 }
 
 resource "aws_eks_addon" "vpc_cni_addon" {
-  count = local.handle_aws_vpc_cni ? 1 : 0
+  count = var.vpc_cni_addon == null ? 0 : 1
 
   cluster_name                = aws_eks_cluster.quortex.name
   addon_name                  = "vpc-cni"
-  addon_version               = var.cluster_addons["vpc-cni"].version
-  configuration_values        = try(var.cluster_addons["vpc-cni"].configuration_values, null)
-  preserve                    = try(var.cluster_addons["vpc-cni"].preserve, null)
-  resolve_conflicts_on_update = try(var.cluster_addons["vpc-cni"].resolve_conflicts, "OVERWRITE")
-  resolve_conflicts_on_create = try(var.cluster_addons["vpc-cni"].resolve_conflicts, "OVERWRITE")
+  addon_version               = var.vpc_cni_addon.version
+  configuration_values        = jsonencode(merge(local.vpc_cni_configuration_values, var.vpc_cni_addon.configuration_values))
+  preserve                    = var.vpc_cni_addon.preserve
+  resolve_conflicts_on_update = var.vpc_cni_addon.resolve_conflicts
+  resolve_conflicts_on_create = var.vpc_cni_addon.resolve_conflicts
   service_account_role_arn    = lookup(local.addon_irsa_service_account_arn, "vpc-cni", null)
 
   tags = var.tags
@@ -221,8 +228,6 @@ resource "aws_eks_addon" "quortex_addon" {
   service_account_role_arn    = lookup(local.addon_irsa_service_account_arn, each.key, null)
 
   tags = var.tags
-
-  depends_on = [helm_release.eni_configs]
 }
 
 # This AWS CLI command will add tags to the ASG created by EKS
@@ -287,19 +292,4 @@ resource "aws_cloudwatch_log_group" "cluster_logs" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = var.cluster_logs_retention
   tags              = var.tags
-}
-
-resource "helm_release" "eni_configs" {
-  count      = var.handle_eni_configs ? 1 : 0
-  version    = "1.0.0"
-  chart      = "empty"
-  repository = "https://quortex.github.io/helm-charts"
-  name       = "aws-vpc-cni-config"
-
-  values = [
-    templatefile("${path.module}/templates/eniconfigs.yaml", {
-      eniConfigs : jsonencode(local.eni_configs)
-    })
-  ]
-  depends_on = [aws_eks_addon.vpc_cni_addon]
 }

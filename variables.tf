@@ -300,6 +300,17 @@ variable "cluster_addons" {
   default     = {}
 }
 
+variable "vpc_cni_addon" {
+  description = "vpc-cni addon definition"
+  type = object({
+    version              = string
+    resolve_conflicts    = optional(string, "OVERWRITE")
+    preserve             = optional(bool)
+    configuration_values = any
+  })
+  nullable = true
+}
+
 variable "manage_aws_auth_configmap" {
   description = "Determines whether to manage the aws-auth configmap."
   type        = bool

@@ -122,7 +122,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
               : "${k}=${v}"]
             )
             use_max_pods     = var.node_use_max_pods
-            cni_version      = try(var.cluster_addons["vpc-cni"].version, "")
+            cni_version      = try(var.vpc_cni_addon.version, "")
             show_max_allowed = var.node_use_max_pods_allowed
           }
         )

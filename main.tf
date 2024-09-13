@@ -200,7 +200,7 @@ locals {
 }
 
 resource "aws_eks_addon" "vpc_cni_addon" {
-  count = var.vpc_cni_addon == null ? 0 : 1
+  count = var.vpc_cni_addon != null ? 1 : 0
 
   cluster_name                = aws_eks_cluster.quortex.name
   addon_name                  = "vpc-cni"

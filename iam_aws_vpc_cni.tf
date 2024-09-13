@@ -1,5 +1,5 @@
 locals {
-  handle_aws_vpc_cni = var.handle_iam_resources && (var.handle_iam_aws_vpc_cni || contains(keys(var.cluster_addons), "vpc-cni"))
+  handle_aws_vpc_cni = var.handle_iam_resources && var.handle_iam_aws_vpc_cni
 }
 
 resource "aws_iam_role" "aws_vpc_cni" {

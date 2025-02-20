@@ -15,6 +15,17 @@ if [[ "${use_max_pods}" = "false" ]]; then
   fi
 fi
 
+# Keep unpacked layers
+if [[ "${discard_unpacked_layers}" = "false" ]]; then
+  mkdir -p /etc/containerd/config.d
+  cat > /etc/containerd/config.d/spegel.toml << EOL
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"
+  [plugins."io.containerd.grpc.v1.cri".containerd]
+    discard_unpacked_layers = false
+EOL
+fi
+
 /etc/eks/bootstrap.sh ${cluster_name} \
   --use-max-pods ${use_max_pods} \
   --kubelet-extra-args '--node-labels=${node_labels} --register-with-taints=${node_taints} ${kubelet_extra_args}' \

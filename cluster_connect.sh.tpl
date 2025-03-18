@@ -22,7 +22,8 @@ fi
   --apiserver-endpoint ${api_server_url}
 
 %{ if discard_unpacked_layers == false }
-# Keep unpacked layers
+# Retain unpacked layers. We avoid using the configuration merge capability of containerd due to a known bug.
+# For more details, refer to: https://github.com/containerd/containerd/issues/5837
 sed -i '/discard_unpacked_layers = true/s/true/false/' /etc/containerd/config.toml
 systemctl restart containerd
 %{ endif }

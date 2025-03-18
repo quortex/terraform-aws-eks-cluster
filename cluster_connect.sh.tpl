@@ -15,19 +15,15 @@ else
 fi
 %{ endif }
 
-%{ if discard_unpacked_layers == false }
-# Keep unpacked layers
-mkdir -p /etc/containerd/config.d
-cat > /etc/containerd/config.d/spegel.toml << EOL
-[plugins."io.containerd.grpc.v1.cri".registry]
-  config_path = "/etc/containerd/certs.d"
-[plugins."io.containerd.grpc.v1.cri".containerd]
-  discard_unpacked_layers = false
-EOL
-%{ endif }
-
 /etc/eks/bootstrap.sh ${cluster_name} \
   --use-max-pods ${use_max_pods} \
   --kubelet-extra-args '--node-labels=${node_labels} --register-with-taints=${node_taints} ${kubelet_extra_args}' \
   --b64-cluster-ca ${base64_cluster_ca} \
   --apiserver-endpoint ${api_server_url}
+
+%{ if discard_unpacked_layers == false }
+# Retain unpacked layers. We avoid using the configuration merge capability of containerd due to a known bug.
+# For more details, refer to: https://github.com/containerd/containerd/issues/5837
+sed -i '/discard_unpacked_layers = true/s/true/false/' /etc/containerd/config.toml
+systemctl restart containerd
+%{ endif }

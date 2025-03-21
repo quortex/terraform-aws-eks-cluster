@@ -216,7 +216,7 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
       instances_distribution {
         on_demand_base_capacity                  = lookup(each.value, "on_demand_base_capacity", 0)
         on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", each.value.market_type == "spot" ? 0 : 100)
-        on_demand_allocation_strategy = lookup(each.value, "on_demand_allocation_strategy", "lowest-price")
+        on_demand_allocation_strategy            = lookup(each.value, "on_demand_allocation_strategy", "lowest-price")
         spot_allocation_strategy                 = lookup(each.value, "spot_allocation_strategy", "capacity-optimized")
         spot_max_price                           = lookup(each.value, "spot_max_price", "")
         spot_instance_pools                      = lookup(each.value, "spot_instance_pools", 0)

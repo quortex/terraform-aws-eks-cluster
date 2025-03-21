@@ -187,9 +187,9 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     ]
   }
 
-  # Only for On-Demand instance groups:
+  # For groups with only 1 instance type:
   dynamic "launch_template" {
-    for_each = each.value.market_type == "on-demand" ? [true] : []
+    for_each = length(each.value.instance_types) == 1 ? [true] : []
 
     content {
       id      = aws_launch_template.quortex_launch_tpl[each.key].id
@@ -207,15 +207,16 @@ resource "aws_autoscaling_group" "quortex_asg_advanced" {
     }
   }
 
-  # Only for Spot instance groups:
+  # For groups with multiple instance types:
   dynamic "mixed_instances_policy" {
-    for_each = each.value.market_type == "spot" ? [true] : []
+    for_each = length(each.value.instance_types) > 1 ? [true] : []
 
     content {
 
       instances_distribution {
         on_demand_base_capacity                  = lookup(each.value, "on_demand_base_capacity", 0)
-        on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", 0)
+        on_demand_percentage_above_base_capacity = lookup(each.value, "on_demand_percentage_above_base_capacity", each.value.market_type == "spot" ? 0 : 100)
+        on_demand_allocation_strategy = lookup(each.value, "on_demand_allocation_strategy", "lowest-price")
         spot_allocation_strategy                 = lookup(each.value, "spot_allocation_strategy", "capacity-optimized")
         spot_max_price                           = lookup(each.value, "spot_max_price", "")
         spot_instance_pools                      = lookup(each.value, "spot_instance_pools", 0)

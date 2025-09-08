@@ -165,6 +165,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     },
     var.tags
   )
+
   lifecycle {
     precondition {
       condition     = length(each.value.instance_types) > 0

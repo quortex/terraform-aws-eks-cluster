@@ -165,6 +165,13 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     },
     var.tags
   )
+
+  lifecycle {
+    precondition {
+      condition     = length(each.value.instance_types) > 0
+      error_message = "node group '${each.key}' must have at least one instance type defined"
+    }
+  }
 }
 
 # For each node group, create an autoscaling group based on the launch template

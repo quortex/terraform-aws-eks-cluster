@@ -82,13 +82,6 @@ locals {
 
 # One launch template per node group
 resource "aws_launch_template" "quortex_launch_tpl" {
-
-  lifecycle {
-    precondition {
-      condition     = length(each.value.instance_types) > 0
-      error_message = "node group '${each.key}' must have at least one instance type defined"
-    }
-  }
   for_each = local.filtered_node_groups_advanced
 
   name = lookup(each.value, "asg_name", "${var.cluster_name}_${each.key}")
@@ -172,6 +165,12 @@ resource "aws_launch_template" "quortex_launch_tpl" {
     },
     var.tags
   )
+  lifecycle {
+    precondition {
+      condition     = length(each.value.instance_types) > 0
+      error_message = "node group '${each.key}' must have at least one instance type defined"
+    }
+  }
 }
 
 # For each node group, create an autoscaling group based on the launch template

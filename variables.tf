@@ -216,6 +216,12 @@ variable "discard_unpacked_layers" {
   description = "Set to false to keep unpacked layers on the node after the image is pulled. By default, EKS will clean up the unpacked layers to save disk space."
 }
 
+variable "ami_al2023" {
+  description = "Whether to use Amazon Linux 2023 AMI for worker nodes (only applies to advanced_node_groups)."
+  type        = bool
+  default     = false
+}
+
 variable "node_use_max_pods_allowed" {
   type        = bool
   default     = false

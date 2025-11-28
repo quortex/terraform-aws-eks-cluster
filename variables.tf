@@ -210,12 +210,6 @@ variable "node_use_max_pods" {
   description = "Set to false to prevent EKS from setting --max-pods in Kubelet config. By default, EKS sets the maximum number of pods that can run on the node, based on the instance type. Disabling this can be useful when using a CNI other than the default, like Calico."
 }
 
-variable "discard_unpacked_layers" {
-  type        = bool
-  default     = true
-  description = "Set to false to keep unpacked layers on the node after the image is pulled. By default, EKS will clean up the unpacked layers to save disk space."
-}
-
 variable "ami_al2023" {
   description = "Whether to use Amazon Linux 2023 AMI for worker nodes (only applies to advanced_node_groups)."
   type        = bool

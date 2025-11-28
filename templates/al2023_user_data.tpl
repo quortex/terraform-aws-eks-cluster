@@ -11,6 +11,10 @@ spec:
     flags:
       - --node-labels=${node_labels}
       - --register-with-taints=${node_taints}
+%{ if single_process_oom_kill == true }
+    config:
+      singleProcessOOMKill: true
+%{ endif }
 %{ if discard_unpacked_layers == false }
   containerd:
     config: |

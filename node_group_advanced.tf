@@ -99,7 +99,8 @@ resource "aws_launch_template" "quortex_launch_tpl" {
         cluster_endpoint        = aws_eks_cluster.quortex.endpoint
         cluster_auth_base64     = aws_eks_cluster.quortex.certificate_authority[0].data
         cluster_service_cidr    = aws_eks_cluster.quortex.kubernetes_network_config[0].service_ipv4_cidr
-        discard_unpacked_layers = var.discard_unpacked_layers
+        discard_unpacked_layers = tobool(lookup(each.value, "discard_unpacked_layers", true))
+        single_process_oom_kill = tobool(lookup(each.value, "single_process_oom_kill", false))
         # define the k8s node taints (passed to --kubelet-extra-args)
         node_taints = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
         # define the k8s node labels (passed to --kubelet-extra-args)
@@ -153,7 +154,7 @@ resource "aws_launch_template" "quortex_launch_tpl" {
             use_max_pods            = var.node_use_max_pods
             cni_version             = try(var.vpc_cni_addon.version, "")
             show_max_allowed        = var.node_use_max_pods_allowed
-            discard_unpacked_layers = var.discard_unpacked_layers
+            discard_unpacked_layers = lookup(each.value, "discard_unpacked_layers", true)
           }
         )
       }

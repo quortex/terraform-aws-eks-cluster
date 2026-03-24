@@ -177,3 +177,9 @@ variable "worker_role_arn" {
   description = "The ARN of a role with the necessary permissions for EKS workers. (to be used with handle_iam_resources = false)"
   default     = ""
 }
+
+variable "ami_al2023" {
+  description = "Whether to use Amazon Linux 2023 AMI for worker nodes (only applies to advanced_node_groups)."
+  type        = bool
+  default     = false
+}

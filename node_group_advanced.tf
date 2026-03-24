@@ -68,7 +68,7 @@ resource "aws_iam_instance_profile" "quortex" {
 data "aws_ami" "eks_worker_image" {
   filter {
     name   = "name"
-    values = ["amazon-eks-node-${local.kubernetes_worker_nodes_version}-v*"]
+    values = var.ami_al2023 ? ["amazon-eks-node-al2023-x86_64-standard-${local.kubernetes_worker_nodes_version}-v*"] : ["amazon-eks-node-${local.kubernetes_worker_nodes_version}-v*"]
   }
   most_recent = true
   owners      = ["self", "amazon"]
@@ -90,9 +90,39 @@ resource "aws_launch_template" "quortex_launch_tpl" {
 
   update_default_version = true
 
-  user_data = base64encode(
+  user_data = var.ami_al2023 ? base64encode(
     templatefile(
-      "${path.module}/userdata.sh.tpl",
+      "${path.module}/templates/al2023_user_data.tpl",
+      {
+        cluster_name            = aws_eks_cluster.quortex.name
+        cluster_endpoint        = aws_eks_cluster.quortex.endpoint
+        cluster_auth_base64     = aws_eks_cluster.quortex.certificate_authority[0].data
+        cluster_service_cidr    = aws_eks_cluster.quortex.kubernetes_network_config[0].service_ipv4_cidr
+        discard_unpacked_layers = tobool(lookup(each.value, "discard_unpacked_layers", true))
+        single_process_oom_kill = tobool(lookup(each.value, "single_process_oom_kill", false))
+        # define the k8s node taints (passed to --kubelet-extra-args)
+        node_taints = length(each.value.taints) == 0 ? "" : join(",", [for k, v in lookup(each.value, "taints", {}) : "${k}=${v}"])
+        # define the k8s node labels (passed to --kubelet-extra-args)
+        node_labels = join(
+          ",",
+          [
+            for k, v in
+            merge(
+              # Built-in labels
+              {
+                "eks.amazonaws.com/nodegroup-image" = local.ami_id_worker,
+                "eks.amazonaws.com/nodegroup"       = each.key,
+                "nodegroup"                         = each.key
+              },
+              # User-specified labels
+              lookup(each.value, "labels", {}),
+            )
+          : "${k}=${v}"]
+        )
+      }
+    )) : base64encode(
+    templatefile(
+      "${path.module}/templates/userdata.sh.tpl",
       {
         cluster_name            = aws_eks_cluster.quortex.name
         base64_cluster_ca       = aws_eks_cluster.quortex.certificate_authority[0].data

@@ -26,6 +26,14 @@ output "autoscaling_group_names" {
   description = "The names of the created autoscaling groups"
 }
 
+output "autoscaling_group_names_map" {
+  value = {
+    "managed"  = { for k, v in aws_eks_node_group.quortex : k => try(v.resources.0.autoscaling_groups.0.name, "") },
+    "advanced" = { for k, v in aws_autoscaling_group.quortex_asg_advanced : k => v.name }
+  }
+  description = "A map containing the names of the created autoscaling groups."
+}
+
 output "node_groups_names" {
   value       = { for k, v in aws_eks_node_group.quortex : k => v.node_group_name }
   description = "A map with node groups names for each node_groups provided in variables."
